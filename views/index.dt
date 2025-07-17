@@ -18,6 +18,7 @@ html
       | 
       | function changeBackgroundColor() {
       |   console.log('🎯 Button clicked! Starting EPIC effects...');
+      |   alert('Button clicked! Function is working!');
       |   const debugInfo = document.getElementById('debug-info');
       |   const colors = [
       |     '#f5f5f5', '#e8f4fd', '#fff2e8', '#f0fff0', '#fff0f5', '#f0f8ff', '#fdf5e6', '#f5fffa',
