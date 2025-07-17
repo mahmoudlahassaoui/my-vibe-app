@@ -4,18 +4,10 @@ FROM dlang2/dmd-ubuntu:latest
 # Set working directory
 WORKDIR /app
 
-# Copy project configuration first (for better caching)
-COPY dub.json dub.selections.json ./
+# Copy all project files
+COPY . .
 
-# Install dependencies
-RUN dub fetch
-
-# Copy source code
-COPY source/ ./source/
-COPY views/ ./views/
-COPY public/ ./public/
-
-# Build the application in release mode
+# Build the application in release mode (this will fetch dependencies automatically)
 RUN dub build --build=release --compiler=dmd
 
 # Create data directory for JSON storage
