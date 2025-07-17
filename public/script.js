@@ -160,8 +160,9 @@ function createParticles() {
     document.body.appendChild(particle);
     setTimeout(() => particle.remove(), 2000);
   }
-}// 
-Game Variables
+}
+
+// Game Variables
 let gameSequence = [];
 let playerSequence = [];
 let gameLevel = 1;
