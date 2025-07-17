@@ -7,7 +7,8 @@ WORKDIR /app
 # Copy all project files
 COPY . .
 
-# Build the application in release mode (this will fetch dependencies automatically)
+# Set D compiler environment variable and build the application
+ENV DC=dmd
 RUN dub build --build=release
 
 # Create data directory for JSON storage
