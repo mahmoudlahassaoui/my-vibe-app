@@ -3,6 +3,7 @@ html
   head
     title Login - My Vibe.d App
     link(rel="stylesheet", href="/style.css")
+    script(src="/script.js")
   body
     nav
       ul

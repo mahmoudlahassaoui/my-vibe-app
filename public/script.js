@@ -1,5 +1,15 @@
 console.log('🚀 Script.js loaded successfully!');
 
+// Apply saved color when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  const savedColor = localStorage.getItem('vibeAppBackgroundColor');
+  if (savedColor) {
+    console.log('🎨 Applying saved color:', savedColor);
+    document.body.style.backgroundColor = savedColor;
+    document.body.style.transition = 'background-color 0.8s ease-in-out';
+  }
+});
+
 function changeBackgroundColor() {
   console.log('🎯 Button clicked! Starting effects...');
   const debugInfo = document.getElementById('debug-info');
@@ -28,6 +38,10 @@ function changeBackgroundColor() {
   
   // Play sound effects!
   playClickSound();
+  
+  // Save the color choice to localStorage
+  localStorage.setItem('vibeAppBackgroundColor', newColor);
+  console.log('💾 Saved color to localStorage:', newColor);
   
   // Add smooth transition
   document.body.style.transition = 'background-color 0.8s ease-in-out';

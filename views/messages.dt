@@ -3,6 +3,7 @@ html
   head
     title Messages - My Vibe.d App
     link(rel="stylesheet", href="/style.css")
+    script(src="/script.js")
   body
     h1 Contact Messages
     
