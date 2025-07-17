@@ -3,7 +3,15 @@ html
   head
     title Welcome to My Vibe.d App
     link(rel="stylesheet", href="/style.css")
-    script(src="/script.js")
+    script
+      | console.log('🚀 Inline script loaded!');
+      | function changeBackgroundColor() {
+      |   console.log('🎯 Button clicked!');
+      |   const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98fb98'];
+      |   const newColor = colors[Math.floor(Math.random() * colors.length)];
+      |   document.body.style.backgroundColor = newColor;
+      |   localStorage.setItem('vibeAppBackgroundColor', newColor);
+      | }
   body
     nav
       ul
