@@ -1,0 +1,38 @@
+doctype html
+html
+  head
+    title Login - My Vibe.d App
+    link(rel="stylesheet", href="/style.css")
+  body
+    nav
+      ul
+        li: a(href="/") Home
+        li: a(href="/login") Login
+        li: a(href="/register") Register
+        li: a(href="/contact") Contact
+        li: a(href="/messages") Messages
+    
+    .container
+      h1 🔐 Login
+      
+      - if (errorMessage.length > 0)
+        .error= errorMessage
+      
+      form.auth-form(method="post", action="/login")
+        .form-group
+          label(for="username") Username:
+          input#username(type="text", name="username", required, placeholder="Enter your username")
+        
+        .form-group
+          label(for="password") Password:
+          input#password(type="password", name="password", required, placeholder="Enter your password")
+        
+        .form-group
+          input.btn(type="submit", value="Login")
+      
+      p.auth-link
+        | Don't have an account? 
+        a(href="/register") Register here
+      
+      .back-link
+        a(href="/") ← Back to Home

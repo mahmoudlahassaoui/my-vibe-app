@@ -1,0 +1,18 @@
+[
+    {
+        "email": "mahmoud@gmail.com",
+        "id": 1,
+        "message": "Hello Mahmoud,\r\nHow are you\r\nI hope you're doing great!",
+        "name": "Mahmoud",
+        "timestamp": "2025-07-17T09:15:00.496933",
+        "userId": ""
+    },
+    {
+        "email": "tinigarru@gmail.com",
+        "id": 2,
+        "message": "Hello Tini",
+        "name": "tinigarru",
+        "timestamp": "2025-07-17T09:30:58.3267971",
+        "userId": ""
+    }
+]

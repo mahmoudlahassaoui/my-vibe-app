@@ -1,0 +1,48 @@
+doctype html
+html
+  head
+    title Welcome to My Vibe.d App
+    link(rel="stylesheet", href="/style.css")
+  body
+    nav
+      ul
+        li: a(href="/") Home
+        - if (isLoggedIn)
+          li: a(href="/contact") Contact
+          li: a(href="/messages") Messages
+          li: a(href="/logout") Logout (#{username})
+        - else
+          li: a(href="/login") Login
+          li: a(href="/register") Register
+    
+    .container
+      - if (isLoggedIn)
+        h1 🎉 Welcome back, #{username}!
+        .success
+          p You are logged in and ready to use all features!
+      - else
+        h1 👋 Welcome to My Vibe.d App!
+        p Please login or register to access all features.
+      
+      .stats
+        p 📊 Total messages received: #{messageCount}
+      
+      h2 What can you do?
+      ul.feature-list
+        - if (isLoggedIn)
+          li ✅ Send contact messages
+          li ✅ View all messages
+          li ✅ Access your account
+          li ✅ Secure session management
+        - else
+          li 🔐 Create an account to get started
+          li 🔐 Login to access messaging features
+          li 📖 Learn about Vibe.d web development
+      
+      .actions
+        - if (isLoggedIn)
+          a.btn(href="/contact") Send Message
+          a.btn.secondary(href="/messages") View Messages
+        - else
+          a.btn(href="/register") Get Started
+          a.btn.secondary(href="/login") Login

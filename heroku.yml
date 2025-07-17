@@ -1,0 +1,7 @@
+# Heroku deployment configuration
+build:
+  docker:
+    web: Dockerfile
+
+run:
+  web: ./my-vibe-app

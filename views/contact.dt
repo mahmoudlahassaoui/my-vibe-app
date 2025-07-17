@@ -1,0 +1,38 @@
+doctype html
+html
+  head
+    title Contact Us
+    link(rel="stylesheet", href="/style.css")
+  body
+    h1 Contact Form
+    
+    nav
+      ul
+        li
+          a(href="/") Home
+        li
+          a(href="/contact") Contact
+        li
+          a(href="/messages") Messages
+    
+    - if (successMessage.length > 0)
+      .success= successMessage
+    
+    - if (errorMessage.length > 0)
+      .error= errorMessage
+    
+    form(method="post", action="/contact")
+      p
+        label Name:
+        input(type="text", name="name", required)
+      p
+        label Email:
+        input(type="email", name="email", required)
+      p
+        label Message:
+        textarea(name="message", required)
+      p
+        input(type="submit", value="Send")
+    
+    p
+      a(href="/") Back to Home

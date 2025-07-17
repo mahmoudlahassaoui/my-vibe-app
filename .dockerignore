@@ -1,0 +1,22 @@
+# Ignore unnecessary files for Docker build
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+deploy.sh
+
+# Build artifacts
+.dub/
+*.exe
+*.pdb
+*.dll
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

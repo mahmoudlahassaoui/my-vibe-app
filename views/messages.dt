@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    title Messages - My Vibe.d App
+    link(rel="stylesheet", href="/style.css")
+  body
+    h1 Contact Messages
+    
+    nav
+      ul
+        li
+          a(href="/") Home
+        li
+          a(href="/contact") Contact
+        li
+          a(href="/messages") Messages
+    
+    - if (messages.length == 0)
+      p No messages yet. 
+        a(href="/contact") Send the first one!
+    - else
+      p Total messages: #{messages.length}
+      
+      - foreach_reverse(msg; messages)
+        .message
+          h3 From: #{msg.name}
+          p Email: #{msg.email}
+          p Message: #{msg.message}
+          p Sent: #{msg.timestamp.toSimpleString()}

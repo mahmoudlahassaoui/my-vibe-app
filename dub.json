@@ -1,0 +1,9 @@
+{
+    "name": "my-vibe-app",
+    "description": "Production-ready Vibe.d web application with database support",
+    "authors": ["Mahmoud Lahassaoui"],
+    "license": "proprietary",
+    "dependencies": {
+        "vibe-d": "~>0.9"
+    }
+}

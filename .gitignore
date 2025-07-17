@@ -1,0 +1,35 @@
+# Build artifacts
+.dub/
+*.exe
+*.pdb
+*.dll
+*.obj
+*.lib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment files (keep .env.production as template)
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Temporary files
+tmp/
+temp/
