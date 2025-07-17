@@ -1,3 +1,5 @@
+console.log('🚀 Script.js loaded successfully!');
+
 function changeBackgroundColor() {
   console.log('🎯 Button clicked! Starting effects...');
   const debugInfo = document.getElementById('debug-info');
