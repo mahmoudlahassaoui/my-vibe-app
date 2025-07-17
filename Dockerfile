@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build the application in release mode (this will fetch dependencies automatically)
-RUN dub build --build=release --compiler=dmd
+RUN dub build --build=release
 
 # Create data directory for JSON storage
 RUN mkdir -p /app/data
