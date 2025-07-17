@@ -157,4 +157,267 @@ function createParticles() {
     document.body.appendChild(particle);
     setTimeout(() => particle.remove(), 2000);
   }
+}// Gam
+e Variables
+let gameSequence = [];
+let playerSequence = [];
+let gameLevel = 1;
+let gameScore = 0;
+let gameActive = false;
+let achievements = JSON.parse(localStorage.getItem('vibeAppAchievements') || '[]');
+
+// Color Memory Game Functions
+function startGame() {
+  console.log('🎮 Starting Color Memory Game!');
+  gameSequence = [];
+  playerSequence = [];
+  gameLevel = 1;
+  gameScore = 0;
+  gameActive = true;
+  
+  updateGameScore();
+  document.getElementById('game-instructions').textContent = 'Watch the sequence...';
+  
+  setTimeout(() => {
+    addToSequence();
+    playSequence();
+  }, 1000);
 }
+
+function addToSequence() {
+  const colors = ['red', 'blue', 'green', 'yellow'];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  gameSequence.push(randomColor);
+  console.log('🎯 Added to sequence:', randomColor);
+}
+
+function playSequence() {
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= gameSequence.length) {
+      clearInterval(interval);
+      document.getElementById('game-instructions').textContent = 'Now repeat the sequence!';
+      return;
+    }
+    
+    flashTile(gameSequence[i]);
+    i++;
+  }, 800);
+}
+
+function flashTile(color) {
+  const tile = document.querySelector(`[data-color="${color}"]`);
+  tile.classList.add('flash');
+  
+  // Play tile sound
+  playTileSound(color);
+  
+  setTimeout(() => {
+    tile.classList.remove('flash');
+  }, 500);
+}
+
+function gameClick(color) {
+  if (!gameActive) return;
+  
+  console.log('🎯 Player clicked:', color);
+  flashTile(color);
+  playerSequence.push(color);
+  
+  // Check if player is correct so far
+  const currentIndex = playerSequence.length - 1;
+  if (playerSequence[currentIndex] !== gameSequence[currentIndex]) {
+    // Wrong! Game over
+    gameOver();
+    return;
+  }
+  
+  // Check if player completed the sequence
+  if (playerSequence.length === gameSequence.length) {
+    // Correct sequence completed!
+    gameScore += gameLevel * 10;
+    gameLevel++;
+    playerSequence = [];
+    
+    updateGameScore();
+    document.getElementById('game-instructions').textContent = 'Great! Next level...';
+    
+    // Check for achievements
+    checkGameAchievements();
+    
+    setTimeout(() => {
+      addToSequence();
+      playSequence();
+    }, 1500);
+  }
+}
+
+function gameOver() {
+  gameActive = false;
+  document.getElementById('game-instructions').textContent = `Game Over! Final Score: ${gameScore}`;
+  console.log('💀 Game Over! Score:', gameScore);
+  
+  // Save high score
+  const highScore = localStorage.getItem('vibeAppHighScore') || 0;
+  if (gameScore > highScore) {
+    localStorage.setItem('vibeAppHighScore', gameScore);
+    showAchievement('🏆 New High Score!', `You scored ${gameScore} points!`);
+  }
+}
+
+function updateGameScore() {
+  document.getElementById('game-score').textContent = `Score: ${gameScore} | Level: ${gameLevel}`;
+}
+
+function playTileSound(color) {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Different frequencies for different colors
+    const frequencies = {
+      red: 261.63,    // C4
+      blue: 329.63,   // E4
+      green: 392.00,  // G4
+      yellow: 523.25  // C5
+    };
+    
+    oscillator.frequency.setValueAtTime(frequencies[color], audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (e) {
+    console.log('Audio not supported');
+  }
+}
+
+// Color Palette Functions
+function applyPalette(paletteName) {
+  console.log('🎨 Applying palette:', paletteName);
+  
+  const palettes = {
+    sunset: ['#ff6b6b', '#ffa726', '#ffcc02'],
+    ocean: ['#4ecdc4', '#45b7d1', '#96ceb4'],
+    forest: ['#98fb98', '#90ee90', '#8fbc8f'],
+    royal: ['#667eea', '#764ba2', '#dda0dd']
+  };
+  
+  const colors = palettes[paletteName];
+  if (!colors) return;
+  
+  // Apply the first color as background
+  const selectedColor = colors[0];
+  localStorage.setItem('vibeAppBackgroundColor', selectedColor);
+  document.body.style.transition = 'background-color 0.8s ease-in-out';
+  document.body.style.backgroundColor = selectedColor;
+  
+  // Create palette particles
+  createPaletteParticles(colors);
+  
+  // Show achievement
+  showAchievement('🎨 Palette Applied!', `${paletteName.charAt(0).toUpperCase() + paletteName.slice(1)} theme activated!`);
+  
+  // Check for palette achievement
+  checkPaletteAchievement(paletteName);
+}
+
+function createPaletteParticles(colors) {
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.style.cssText = `
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1000;
+      left: ${Math.random() * window.innerWidth}px;
+      top: ${Math.random() * window.innerHeight}px;
+      animation: float 3s ease-out forwards;
+    `;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 3000);
+  }
+}
+
+// Achievement System
+function showAchievement(title, description) {
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.achievement-toast');
+  if (existingToast) existingToast.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `
+    <span class="achievement-icon">🏆</span>
+    <div>
+      <div style="font-weight: bold;">${title}</div>
+      <div style="font-size: 12px; opacity: 0.9;">${description}</div>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Animate in
+  setTimeout(() => toast.classList.add('show'), 100);
+  
+  // Animate out
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+  
+  console.log('🏆 Achievement:', title, description);
+}
+
+function checkGameAchievements() {
+  if (gameLevel === 5 && !achievements.includes('game_level_5')) {
+    achievements.push('game_level_5');
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+    showAchievement('🎮 Game Master!', 'Reached level 5 in Color Memory!');
+  }
+  
+  if (gameScore >= 100 && !achievements.includes('score_100')) {
+    achievements.push('score_100');
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+    showAchievement('💯 Century Club!', 'Scored 100+ points!');
+  }
+}
+
+function checkPaletteAchievement(paletteName) {
+  const paletteKey = `palette_${paletteName}`;
+  if (!achievements.includes(paletteKey)) {
+    achievements.push(paletteKey);
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+  }
+  
+  // Check if all palettes used
+  const allPalettes = ['palette_sunset', 'palette_ocean', 'palette_forest', 'palette_royal'];
+  const hasAllPalettes = allPalettes.every(p => achievements.includes(p));
+  
+  if (hasAllPalettes && !achievements.includes('palette_master')) {
+    achievements.push('palette_master');
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+    showAchievement('🌈 Palette Master!', 'Used all color palettes!');
+  }
+}
+
+// Check for first visit achievement
+document.addEventListener('DOMContentLoaded', function() {
+  if (!achievements.includes('first_visit')) {
+    achievements.push('first_visit');
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+    setTimeout(() => {
+      showAchievement('👋 Welcome!', 'Thanks for visiting our amazing app!');
+    }, 2000);
+  }
+});

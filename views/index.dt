@@ -52,3 +52,43 @@ html
         h2 🎨 Fun Zone
         button.color-btn(onclick="changeBackgroundColor()") Change Background Color!
         p#debug-info(style="color: white; margin-top: 10px; font-size: 12px;") Click the button to test effects...
+      
+      .game-section
+        h2 🎮 Color Memory Game
+        p#game-instructions Remember the sequence and click the colors in order!
+        .game-board
+          .color-tile(data-color="red", onclick="gameClick('red')")
+          .color-tile(data-color="blue", onclick="gameClick('blue')")
+          .color-tile(data-color="green", onclick="gameClick('green')")
+          .color-tile(data-color="yellow", onclick="gameClick('yellow')")
+        button.game-btn(onclick="startGame()") Start Game
+        p#game-score Score: 0 | Level: 1
+        
+      .palette-section
+        h2 🎨 Color Palettes
+        p Choose from beautiful preset color themes!
+        .palette-grid
+          .palette-option(onclick="applyPalette('sunset')")
+            .palette-preview
+              .color-dot(style="background: #ff6b6b")
+              .color-dot(style="background: #ffa726")
+              .color-dot(style="background: #ffcc02")
+            p Sunset
+          .palette-option(onclick="applyPalette('ocean')")
+            .palette-preview
+              .color-dot(style="background: #4ecdc4")
+              .color-dot(style="background: #45b7d1")
+              .color-dot(style="background: #96ceb4")
+            p Ocean
+          .palette-option(onclick="applyPalette('forest')")
+            .palette-preview
+              .color-dot(style="background: #98fb98")
+              .color-dot(style="background: #90ee90")
+              .color-dot(style="background: #8fbc8f")
+            p Forest
+          .palette-option(onclick="applyPalette('royal')")
+            .palette-preview
+              .color-dot(style="background: #667eea")
+              .color-dot(style="background: #764ba2")
+              .color-dot(style="background: #dda0dd")
+            p Royal
