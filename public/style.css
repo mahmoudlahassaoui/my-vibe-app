@@ -242,3 +242,37 @@ nav a[href="/logout"]:hover {
     font-size: 1.2em;
     font-weight: 600;
 }
+
+/* Action buttons styling */
+.actions {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.actions a {
+    display: inline-block;
+    margin: 10px 15px;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #007acc, #005a99);
+    color: white !important;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 122, 204, 0.3);
+}
+
+.actions a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 122, 204, 0.4);
+    text-decoration: none;
+}
+
+.actions a.btn.secondary {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.actions a.btn.secondary:hover {
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+}
