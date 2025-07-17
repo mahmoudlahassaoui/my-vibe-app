@@ -251,7 +251,7 @@ nav a[href="/logout"]:hover {
 
 .actions a {
     display: inline-block;
-    margin: 10px 15px;
+    margin: 15px 25px;
     padding: 12px 25px;
     background: linear-gradient(135deg, #007acc, #005a99);
     color: white !important;
