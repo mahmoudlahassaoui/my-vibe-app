@@ -5,12 +5,24 @@ html
     link(rel="stylesheet", href="/style.css")
     script
       | console.log('🚀 Inline script loaded!');
+      | 
+      | // Apply saved color when page loads
+      | document.addEventListener('DOMContentLoaded', function() {
+      |   const savedColor = localStorage.getItem('vibeAppBackgroundColor');
+      |   if (savedColor) {
+      |     console.log('🎨 Applying saved color to home page:', savedColor);
+      |     document.body.style.backgroundColor = savedColor;
+      |     document.body.style.transition = 'background-color 0.8s ease-in-out';
+      |   }
+      | });
+      | 
       | function changeBackgroundColor() {
       |   console.log('🎯 Button clicked!');
       |   const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98fb98'];
       |   const newColor = colors[Math.floor(Math.random() * colors.length)];
       |   document.body.style.backgroundColor = newColor;
       |   localStorage.setItem('vibeAppBackgroundColor', newColor);
+      |   console.log('💾 Saved new color:', newColor);
       | }
   body
     nav
