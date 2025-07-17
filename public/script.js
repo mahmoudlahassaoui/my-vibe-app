@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.style.backgroundColor = savedColor;
     document.body.style.transition = 'background-color 0.8s ease-in-out';
   }
+  
+  // Check for first visit achievement
+  const achievements = JSON.parse(localStorage.getItem('vibeAppAchievements') || '[]');
+  if (!achievements.includes('first_visit')) {
+    achievements.push('first_visit');
+    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
+    setTimeout(() => {
+      showAchievement('👋 Welcome!', 'Thanks for visiting our amazing app!');
+    }, 2000);
+  }
 });
 
 function changeBackgroundColor() {
@@ -36,12 +46,12 @@ function changeBackgroundColor() {
   console.log('🎨 Changing color to:', newColor);
   if (debugInfo) debugInfo.textContent = `Changing to: ${newColor}`;
   
-  // Play sound effects!
-  playClickSound();
-  
   // Save the color choice to localStorage
   localStorage.setItem('vibeAppBackgroundColor', newColor);
   console.log('💾 Saved color to localStorage:', newColor);
+  
+  // Play sound effects!
+  playClickSound();
   
   // Add smooth transition
   document.body.style.transition = 'background-color 0.8s ease-in-out';
@@ -73,10 +83,7 @@ function changeBackgroundColor() {
 
 function playClickSound() {
   try {
-    // Create a satisfying click sound using Web Audio API
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Resume audio context if suspended (required by browsers)
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -102,10 +109,7 @@ function playClickSound() {
 
 function playSuccessSound() {
   try {
-    // Create a magical success sound
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Resume audio context if suspended
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -118,12 +122,11 @@ function playSuccessSound() {
     oscillator2.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Create a magical chord
-    oscillator1.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-    oscillator2.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
+    oscillator1.frequency.setValueAtTime(523.25, audioContext.currentTime);
+    oscillator2.frequency.setValueAtTime(659.25, audioContext.currentTime);
     
-    oscillator1.frequency.exponentialRampToValueAtTime(783.99, audioContext.currentTime + 0.3); // G5
-    oscillator2.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.3); // C6
+    oscillator1.frequency.exponentialRampToValueAtTime(783.99, audioContext.currentTime + 0.3);
+    oscillator2.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.3);
     
     gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
@@ -157,14 +160,13 @@ function createParticles() {
     document.body.appendChild(particle);
     setTimeout(() => particle.remove(), 2000);
   }
-}// Gam
-e Variables
+}// 
+Game Variables
 let gameSequence = [];
 let playerSequence = [];
 let gameLevel = 1;
 let gameScore = 0;
 let gameActive = false;
-let achievements = JSON.parse(localStorage.getItem('vibeAppAchievements') || '[]');
 
 // Color Memory Game Functions
 function startGame() {
@@ -207,9 +209,9 @@ function playSequence() {
 
 function flashTile(color) {
   const tile = document.querySelector(`[data-color="${color}"]`);
-  tile.classList.add('flash');
+  if (!tile) return;
   
-  // Play tile sound
+  tile.classList.add('flash');
   playTileSound(color);
   
   setTimeout(() => {
@@ -224,17 +226,13 @@ function gameClick(color) {
   flashTile(color);
   playerSequence.push(color);
   
-  // Check if player is correct so far
   const currentIndex = playerSequence.length - 1;
   if (playerSequence[currentIndex] !== gameSequence[currentIndex]) {
-    // Wrong! Game over
     gameOver();
     return;
   }
   
-  // Check if player completed the sequence
   if (playerSequence.length === gameSequence.length) {
-    // Correct sequence completed!
     gameScore += gameLevel * 10;
     gameLevel++;
     playerSequence = [];
@@ -242,7 +240,6 @@ function gameClick(color) {
     updateGameScore();
     document.getElementById('game-instructions').textContent = 'Great! Next level...';
     
-    // Check for achievements
     checkGameAchievements();
     
     setTimeout(() => {
@@ -257,7 +254,6 @@ function gameOver() {
   document.getElementById('game-instructions').textContent = `Game Over! Final Score: ${gameScore}`;
   console.log('💀 Game Over! Score:', gameScore);
   
-  // Save high score
   const highScore = localStorage.getItem('vibeAppHighScore') || 0;
   if (gameScore > highScore) {
     localStorage.setItem('vibeAppHighScore', gameScore);
@@ -266,7 +262,10 @@ function gameOver() {
 }
 
 function updateGameScore() {
-  document.getElementById('game-score').textContent = `Score: ${gameScore} | Level: ${gameLevel}`;
+  const scoreElement = document.getElementById('game-score');
+  if (scoreElement) {
+    scoreElement.textContent = `Score: ${gameScore} | Level: ${gameLevel}`;
+  }
 }
 
 function playTileSound(color) {
@@ -280,12 +279,11 @@ function playTileSound(color) {
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Different frequencies for different colors
     const frequencies = {
-      red: 261.63,    // C4
-      blue: 329.63,   // E4
-      green: 392.00,  // G4
-      yellow: 523.25  // C5
+      red: 261.63,
+      blue: 329.63,
+      green: 392.00,
+      yellow: 523.25
     };
     
     oscillator.frequency.setValueAtTime(frequencies[color], audioContext.currentTime);
@@ -313,19 +311,13 @@ function applyPalette(paletteName) {
   const colors = palettes[paletteName];
   if (!colors) return;
   
-  // Apply the first color as background
   const selectedColor = colors[0];
   localStorage.setItem('vibeAppBackgroundColor', selectedColor);
   document.body.style.transition = 'background-color 0.8s ease-in-out';
   document.body.style.backgroundColor = selectedColor;
   
-  // Create palette particles
   createPaletteParticles(colors);
-  
-  // Show achievement
   showAchievement('🎨 Palette Applied!', `${paletteName.charAt(0).toUpperCase() + paletteName.slice(1)} theme activated!`);
-  
-  // Check for palette achievement
   checkPaletteAchievement(paletteName);
 }
 
@@ -351,7 +343,6 @@ function createPaletteParticles(colors) {
 
 // Achievement System
 function showAchievement(title, description) {
-  // Remove existing toast if any
   const existingToast = document.querySelector('.achievement-toast');
   if (existingToast) existingToast.remove();
   
@@ -367,10 +358,8 @@ function showAchievement(title, description) {
   
   document.body.appendChild(toast);
   
-  // Animate in
   setTimeout(() => toast.classList.add('show'), 100);
   
-  // Animate out
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 500);
@@ -380,6 +369,8 @@ function showAchievement(title, description) {
 }
 
 function checkGameAchievements() {
+  const achievements = JSON.parse(localStorage.getItem('vibeAppAchievements') || '[]');
+  
   if (gameLevel === 5 && !achievements.includes('game_level_5')) {
     achievements.push('game_level_5');
     localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
@@ -394,13 +385,14 @@ function checkGameAchievements() {
 }
 
 function checkPaletteAchievement(paletteName) {
+  const achievements = JSON.parse(localStorage.getItem('vibeAppAchievements') || '[]');
   const paletteKey = `palette_${paletteName}`;
+  
   if (!achievements.includes(paletteKey)) {
     achievements.push(paletteKey);
     localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
   }
   
-  // Check if all palettes used
   const allPalettes = ['palette_sunset', 'palette_ocean', 'palette_forest', 'palette_royal'];
   const hasAllPalettes = allPalettes.every(p => achievements.includes(p));
   
@@ -410,14 +402,3 @@ function checkPaletteAchievement(paletteName) {
     showAchievement('🌈 Palette Master!', 'Used all color palettes!');
   }
 }
-
-// Check for first visit achievement
-document.addEventListener('DOMContentLoaded', function() {
-  if (!achievements.includes('first_visit')) {
-    achievements.push('first_visit');
-    localStorage.setItem('vibeAppAchievements', JSON.stringify(achievements));
-    setTimeout(() => {
-      showAchievement('👋 Welcome!', 'Thanks for visiting our amazing app!');
-    }, 2000);
-  }
-});
