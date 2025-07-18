@@ -25,36 +25,62 @@ var sounds = {
 // Initialize audio context
 function initAudio() {
     try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        console.log('🔊 Audio initialized');
+        // Check for AudioContext support
+        if (window.AudioContext) {
+            audioContext = new AudioContext();
+        } else if (window.webkitAudioContext) {
+            audioContext = new window.webkitAudioContext();
+        } else {
+            console.log('🔇 Web Audio API not supported');
+            return;
+        }
+        
+        // Resume audio context if suspended (required by some browsers)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        console.log('🔊 Audio initialized successfully');
     } catch (e) {
-        console.log('🔇 Audio not supported');
+        console.log('🔇 Audio initialization failed:', e);
     }
 }
 
 // Play sound with frequency
-function playSound(frequency, duration = 300) {
+function playSoundEffect(frequency, duration = 300) {
+    if (!audioContext) {
+        initAudio();
+    }
     if (!audioContext) return;
     
-    var oscillator = audioContext.createOscillator();
-    var gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + duration / 1000);
+    try {
+        var oscillator = audioContext.createOscillator();
+        var gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration / 1000);
+    } catch (e) {
+        console.log('🔇 Audio playback failed:', e);
+    }
 }
 
 // Enhanced background color change with animations
 function changeBackgroundColor() {
     console.log('🎨 Button clicked!');
+    
+    // Initialize audio on first user interaction
+    if (!audioContext) {
+        initAudio();
+    }
     
     var colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98fb98'];
     var randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -76,7 +102,7 @@ function changeBackgroundColor() {
     createConfetti();
     
     // Play success sound
-    playSound(sounds.success, 200);
+    playSoundEffect(sounds.success, 200);
     
     // Update debug text with animation
     var debugInfo = document.getElementById('debug-info');
@@ -127,6 +153,11 @@ function createConfetti() {
 function applyPalette(name) {
     console.log('🎨 Applying palette:', name);
     
+    // Initialize audio on first user interaction
+    if (!audioContext) {
+        initAudio();
+    }
+    
     var palettes = {
         sunset: {
             bg: '#ff6b6b',
@@ -164,7 +195,7 @@ function applyPalette(name) {
         createPaletteEffect(palettes[name].colors);
         
         // Play palette sound
-        playSound(sounds.success + (Math.random() * 100 - 50), 400);
+        playSoundEffect(sounds.success + (Math.random() * 100 - 50), 400);
         
         localStorage.setItem('vibeAppBackgroundColor', palettes[name].bg);
         console.log('✅ Palette applied:', name, palettes[name].bg);
@@ -212,7 +243,7 @@ function startGame() {
     gameState = {
         sequence: [],
         playerSequence: [],
-        level: 1,
+        level: 0,
         score: 0,
         isPlaying: true,
         isShowingSequence: false
@@ -285,7 +316,7 @@ function flashTile(color, playSound = false) {
     
     // Play sound
     if (playSound && sounds[color]) {
-        playSound(sounds[color], 400);
+        playSoundEffect(sounds[color], 400);
     }
     
     // Reset after flash
@@ -326,7 +357,7 @@ function gameClick(color) {
         // Celebrate
         setTimeout(function() {
             createConfetti();
-            playSound(sounds.success, 600);
+            playSoundEffect(sounds.success, 600);
             
             // Next level after celebration
             setTimeout(function() {
@@ -341,7 +372,7 @@ function gameOver() {
     gameState.isPlaying = false;
     
     // Play fail sound
-    playSound(sounds.fail, 800);
+    playSoundEffect(sounds.fail, 800);
     
     // Flash all tiles red
     var tiles = document.querySelectorAll('.color-tile');
@@ -364,7 +395,7 @@ function gameOver() {
     
     // Show final score
     setTimeout(function() {
-        alert('🎮 Game Over!\n\nFinal Score: ' + gameState.score + '\nLevel Reached: ' + (gameState.level - 1) + '\n\nGreat job! 🎉');
+        alert('🎮 Game Over!\n\nFinal Score: ' + gameState.score + '\nLevel Reached: ' + gameState.level + '\n\nGreat job! 🎉');
     }, 1000);
 }
 
@@ -386,7 +417,7 @@ function resetTileColors() {
 function updateGameScore() {
     var scoreElement = document.getElementById('game-score');
     if (scoreElement) {
-        scoreElement.textContent = 'Score: ' + gameState.score + ' | Level: ' + (gameState.level - 1);
+        scoreElement.textContent = 'Score: ' + gameState.score + ' | Level: ' + gameState.level;
         
         // Animate score update
         scoreElement.style.transform = 'scale(1.1)';
