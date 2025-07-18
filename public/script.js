@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Enhanced AI News functionality
 function loadAINews() {
-    console.log('📰 Loading AI News...');
+    console.log('📰 Loading AI News... (Cache bust: ' + Date.now() + ')');
 
     var container = document.getElementById('news-container');
     var loadingStatus = document.getElementById('loading-status');
@@ -574,12 +574,15 @@ function loadAINews() {
             {
                 title: 'Microsoft Copilot Studio Launches AI Agent Builder',
                 category: 'tech',
-                date: '2025-07-11',
+                date: '2025-07-12',
                 summary: 'Microsoft releases new tools for building custom AI agents within Copilot Studio, targeting enterprise automation.',
                 url: 'https://blogs.microsoft.com/blog/category/ai/',
                 source: 'Microsoft Blog'
             }
         ];
+
+        // Debug: Log the dates being used
+        console.log('📅 News dates loaded:', news.map(function (item) { return item.date; }));
 
         container.innerHTML = '';
 
