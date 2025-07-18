@@ -1,0 +1,38 @@
+doctype html
+html
+  head
+    title AI News - My Vibe.d App
+    link(rel="stylesheet", href="/style.css")
+    script(src="/script.js")
+  body
+    nav
+      ul
+        li: a(href="/") Home
+        li: a(href="/ai-news") AI News
+        - if (isLoggedIn)
+          li: a(href="/contact") Contact
+          li: a(href="/messages") Messages
+          li: a(href="/logout") Logout (#{username})
+        - else
+          li: a(href="/login") Login
+          li: a(href="/register") Register
+    
+    .container
+      h1 🤖 Latest AI News & Updates
+      
+      .news-filters
+        h3 Filter by Category
+        .filter-buttons
+          button.filter-btn.active(onclick="filterNews('all')") All News
+          button.filter-btn(onclick="filterNews('claude')") Claude
+          button.filter-btn(onclick="filterNews('chatgpt')") ChatGPT
+          button.filter-btn(onclick="filterNews('llm')") LLMs
+          button.filter-btn(onclick="filterNews('tech')") Tech
+      
+      .news-loading
+        p#loading-status 🔄 Loading latest AI news...
+      
+      #news-container.news-grid
+      
+      .news-refresh
+        button.refresh-btn(onclick="refreshNews()") 🔄 Refresh News

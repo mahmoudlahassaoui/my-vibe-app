@@ -61,6 +61,7 @@ void main()
     router.get("/contact", &contactPage);
     router.post("/contact", &handleContact);
     router.get("/messages", &messagesPage);
+    router.get("/ai-news", &aiNewsPage);
     
     // Serve static files (CSS, images, etc.)
     router.get("*", serveStaticFiles("public/"));
@@ -122,6 +123,14 @@ void messagesPage(HTTPServerRequest req, HTTPServerResponse res)
 {
     auto messages = getAllMessages();
     res.render!("messages.dt", req, messages);
+}
+
+void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
+{
+    auto currentUser = getCurrentUser(req);
+    string username = currentUser ? currentUser.username : "";
+    bool isLoggedIn = currentUser !is null;
+    res.render!("ai-news.dt", req, username, isLoggedIn);
 }
 
 // Production-ready JSON storage initialization
