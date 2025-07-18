@@ -24,7 +24,7 @@ html
         .success
           p You are logged in and ready to use all features!
       - else
-        h1 👋 Welcome to My Vibe.d App! (v2.1)
+        h1 👋 DEPLOYMENT TEST v3.0 - AI NEWS SHOULD BE HERE!
         p Please login or register to access all features.
       
       .stats
