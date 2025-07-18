@@ -366,6 +366,10 @@ nav li {
     margin: 15px 0;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
 }
 
 .news-card::before {
@@ -386,6 +390,12 @@ nav li {
 .news-card:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border-left-width: 6px;
+}
+
+.news-card:active {
+    transform: translateY(-4px) scale(1.01);
+    transition: all 0.1s ease;
 }
 
 .news-card h3 {
@@ -402,13 +412,65 @@ nav li {
     font-size: 0.95em;
 }
 
+.news-card .news-footer {
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    margin-top: 15px;
+}
+
 .news-card .news-date {
     color: #888;
     font-size: 0.85em;
     font-weight: bold;
+    margin: 0 0 5px 0;
+}
+
+.news-card .news-source {
+    color: #666;
+    font-size: 0.8em;
     margin: 0;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    font-style: italic;
+}
+
+.news-card .click-hint {
+    color: #007acc;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.news-card:hover .click-hint {
+    color: #005a99;
+    text-decoration: underline;
+}
+
+.news-content {
+    flex: 1;
+    padding-right: 15px;
+}
+
+.news-external-icon {
+    font-size: 24px;
+    color: #007acc;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.news-card:hover .news-external-icon {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #005a99;
+}
+
+/* Add a subtle animation for the external link icon */
+@keyframes bounce-link {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.news-card:hover .news-external-icon {
+    animation: bounce-link 0.6s ease-in-out;
 }
 
 .news-card.claude {

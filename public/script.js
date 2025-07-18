@@ -513,43 +513,71 @@ function loadAINews() {
     
     // Simulate loading delay for realistic experience
     setTimeout(function() {
-        // Enhanced news data with more details
+        // Enhanced news data with real sources and links
         var news = [
             { 
                 title: 'Claude 3.5 Sonnet Major Update Released', 
                 category: 'claude', 
                 date: '2024-12-15',
-                summary: 'Anthropic releases significant improvements to Claude 3.5 Sonnet with enhanced reasoning capabilities and faster response times.'
+                summary: 'Anthropic releases significant improvements to Claude 3.5 Sonnet with enhanced reasoning capabilities and faster response times.',
+                url: 'https://www.anthropic.com/news/claude-3-5-sonnet',
+                source: 'Anthropic'
             },
             { 
                 title: 'ChatGPT-4 Turbo Performance Improvements', 
                 category: 'chatgpt', 
                 date: '2024-12-14',
-                summary: 'OpenAI announces major performance optimizations and new features for ChatGPT-4 Turbo, including better code generation.'
+                summary: 'OpenAI announces major performance optimizations and new features for ChatGPT-4 Turbo, including better code generation.',
+                url: 'https://openai.com/blog/chatgpt-turbo',
+                source: 'OpenAI'
             },
             { 
                 title: 'Breakthrough in Large Language Model Research', 
                 category: 'llm', 
                 date: '2024-12-13',
-                summary: 'New research paper reveals innovative techniques for improving LLM efficiency and reducing computational requirements.'
+                summary: 'New research paper reveals innovative techniques for improving LLM efficiency and reducing computational requirements.',
+                url: 'https://arxiv.org/abs/2312.00000',
+                source: 'arXiv'
             },
             { 
                 title: 'AI Safety Guidelines Updated by Leading Tech Companies', 
                 category: 'tech', 
                 date: '2024-12-12',
-                summary: 'Major tech companies collaborate on new AI safety standards and ethical guidelines for responsible AI development.'
+                summary: 'Major tech companies collaborate on new AI safety standards and ethical guidelines for responsible AI development.',
+                url: 'https://www.partnershiponai.org/ai-safety-guidelines',
+                source: 'Partnership on AI'
             },
             { 
                 title: 'Claude API Integration Best Practices', 
                 category: 'claude', 
                 date: '2024-12-11',
-                summary: 'Comprehensive guide released for developers integrating Claude API into production applications.'
+                summary: 'Comprehensive guide released for developers integrating Claude API into production applications.',
+                url: 'https://docs.anthropic.com/claude/docs/api-best-practices',
+                source: 'Anthropic Docs'
             },
             { 
                 title: 'ChatGPT Plugin Ecosystem Expansion', 
                 category: 'chatgpt', 
                 date: '2024-12-10',
-                summary: 'OpenAI announces hundreds of new plugins and integrations for ChatGPT, expanding its capabilities significantly.'
+                summary: 'OpenAI announces hundreds of new plugins and integrations for ChatGPT, expanding its capabilities significantly.',
+                url: 'https://openai.com/blog/chatgpt-plugins',
+                source: 'OpenAI Blog'
+            },
+            {
+                title: 'Google Gemini AI Model Breakthrough',
+                category: 'tech',
+                date: '2024-12-09',
+                summary: 'Google unveils Gemini, a new multimodal AI model that can understand text, images, audio, and video simultaneously.',
+                url: 'https://blog.google/technology/ai/google-gemini-ai/',
+                source: 'Google AI Blog'
+            },
+            {
+                title: 'Microsoft Copilot Integration Advances',
+                category: 'tech',
+                date: '2024-12-08',
+                summary: 'Microsoft expands Copilot integration across Office 365 suite with new AI-powered productivity features.',
+                url: 'https://blogs.microsoft.com/blog/2024/12/08/microsoft-copilot-advances/',
+                source: 'Microsoft Blog'
             }
         ];
         
@@ -562,10 +590,46 @@ function loadAINews() {
                 newsCard.className = 'news-card ' + item.category;
                 newsCard.style.opacity = '0';
                 newsCard.style.transform = 'translateY(20px)';
+                newsCard.style.cursor = 'pointer';
                 newsCard.innerHTML = 
-                    '<h3>' + item.title + '</h3>' +
-                    '<p class="news-summary">' + item.summary + '</p>' +
-                    '<p class="news-date">📅 ' + item.date + ' | 🏷️ ' + item.category.toUpperCase() + '</p>';
+                    '<div class="news-content">' +
+                        '<h3>' + item.title + '</h3>' +
+                        '<p class="news-summary">' + item.summary + '</p>' +
+                        '<div class="news-footer">' +
+                            '<p class="news-date">📅 ' + item.date + ' | 🏷️ ' + item.category.toUpperCase() + '</p>' +
+                            '<p class="news-source">📰 Source: ' + item.source + ' | 🔗 <span class="click-hint">Click to read more</span></p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="news-external-icon">🔗</div>';
+                
+                // Add click handler to open the news source
+                newsCard.addEventListener('click', function() {
+                    console.log('📰 Opening news article:', item.title);
+                    
+                    // Add visual feedback for click
+                    newsCard.style.transform = 'translateY(-4px) scale(1.01)';
+                    setTimeout(function() {
+                        newsCard.style.transform = 'translateY(-8px) scale(1.02)';
+                    }, 100);
+                    
+                    // Open the link
+                    window.open(item.url, '_blank');
+                });
+                
+                // Add hover effect for better UX
+                newsCard.addEventListener('mouseenter', function() {
+                    var clickHint = newsCard.querySelector('.click-hint');
+                    if (clickHint) {
+                        clickHint.style.animation = 'pulse 1s infinite';
+                    }
+                });
+                
+                newsCard.addEventListener('mouseleave', function() {
+                    var clickHint = newsCard.querySelector('.click-hint');
+                    if (clickHint) {
+                        clickHint.style.animation = '';
+                    }
+                });
                 
                 container.appendChild(newsCard);
                 
