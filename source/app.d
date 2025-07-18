@@ -445,7 +445,7 @@ void getAINews(HTTPServerRequest req, HTTPServerResponse res)
         
         // If no news found, provide fallback
         if (allNews.length == 0) {
-            JSONValue fallback = JSONValue.emptyObject;
+            JSONValue fallback;
             fallback["title"] = JSONValue("AI News Coming Soon");
             fallback["url"] = JSONValue("https://techcrunch.com/category/artificial-intelligence/");
             fallback["summary"] = JSONValue("We're working on bringing you the latest AI news. Check back soon!");
@@ -481,7 +481,7 @@ JSONValue[] parseSimpleRSS(string content)
     auto descs = descMatches.array;
     
     for (size_t i = 0; i < titles.length && i < 5; i++) {
-        JSONValue item = JSONValue.emptyObject;
+        JSONValue item;
         item["title"] = JSONValue(titles[i][1].to!string);
         item["url"] = JSONValue(i < links.length ? links[i][1].to!string : "");
         item["summary"] = JSONValue(i < descs.length ? descs[i][1].to!string[0..min(150, descs[i][1].to!string.length)] ~ "..." : "");
