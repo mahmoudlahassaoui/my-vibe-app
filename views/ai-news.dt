@@ -71,4 +71,15 @@ html
       }
       
       // Load news when page loads
-      document.addEventListener('DOMContentLoaded', loadAINews);
+      document.addEventListener('DOMContentLoaded', function() {
+        // Restore saved background color
+        var savedColor = localStorage.getItem('vibeAppBackgroundColor');
+        if (savedColor) {
+          document.body.style.transition = 'background-color 1s ease-in-out';
+          document.body.style.backgroundColor = savedColor;
+          console.log('🎨 Restored background color:', savedColor);
+        }
+        
+        // Load AI news
+        loadAINews();
+      });
