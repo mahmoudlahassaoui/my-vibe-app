@@ -355,6 +355,36 @@ nav li {
     font-size: 14px;
 }
 
+/* Simple AI News styling */
+.news-loading {
+    text-align: center;
+    padding: 20px;
+}
+
+#loading-status {
+    color: #666;
+    font-style: italic;
+}
+
+.news-actions {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#refresh-btn {
+    background: #007acc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#refresh-btn:hover {
+    background: #005a99;
+}
+
 /* Enhanced AI News styling */
 .news-card {
     background: white;

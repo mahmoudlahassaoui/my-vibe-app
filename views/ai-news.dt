@@ -1,0 +1,74 @@
+doctype html
+html
+  head
+    title AI News - My Vibe.d App
+    link(rel="stylesheet", href="/style.css")
+  body
+    nav
+      ul
+        li: a(href="/") Home
+        - if (isLoggedIn)
+          li: a(href="/contact") Contact
+          li: a(href="/messages") Messages
+          li: a(href="/logout") Logout (#{username})
+        - else
+          li: a(href="/login") Login
+          li: a(href="/register") Register
+        li: a(href="/ai-news") AI News
+    
+    .container
+      h1 🤖 Latest AI News
+      
+      .news-loading
+        p#loading-status Loading AI news...
+      
+      #news-container
+      
+      .news-actions
+        button#refresh-btn(onclick="refreshNews()") 🔄 Refresh
+    
+    script.
+      // Simple AI News with RSS feeds
+      function loadAINews() {
+        console.log('Loading AI news...');
+        
+        const container = document.getElementById('news-container');
+        const loading = document.getElementById('loading-status');
+        
+        if (loading) loading.style.display = 'block';
+        if (container) container.innerHTML = '';
+        
+        fetch('/api/ai-news')
+          .then(response => response.json())
+          .then(news => {
+            if (loading) loading.style.display = 'none';
+            displayNews(news, container);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            if (loading) loading.style.display = 'none';
+            if (container) container.innerHTML = '<p>Failed to load news. Please try again.</p>';
+          });
+      }
+      
+      function displayNews(news, container) {
+        if (!container) return;
+        
+        news.forEach(article => {
+          const card = document.createElement('div');
+          card.className = 'news-card';
+          card.innerHTML = `
+            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+            <p>${article.summary}</p>
+            <small>📅 ${article.date} | 📰 ${article.source}</small>
+          `;
+          container.appendChild(card);
+        });
+      }
+      
+      function refreshNews() {
+        loadAINews();
+      }
+      
+      // Load news when page loads
+      document.addEventListener('DOMContentLoaded', loadAINews);

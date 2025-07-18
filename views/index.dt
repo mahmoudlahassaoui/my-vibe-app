@@ -8,6 +8,7 @@ html
     nav
       ul
         li: a(href="/") Home
+        li: a(href="/ai-news") AI News
         - if (isLoggedIn)
           li: a(href="/contact") Contact
           li: a(href="/messages") Messages

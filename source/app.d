@@ -9,6 +9,9 @@ import std.uuid;
 import std.digest.sha;
 import std.random;
 import std.string;
+import std.net.curl;
+import std.regex;
+import std.algorithm : min;
 
 // Structure to store contact messages
 struct ContactMessage {
@@ -70,6 +73,8 @@ void main()
     router.get("/contact", &contactPage);
     router.post("/contact", &handleContact);
     router.get("/messages", &messagesPage);
+    router.get("/ai-news", &aiNewsPage);
+    router.get("/api/ai-news", &getAINews);
 
     
     // Serve static files (CSS, images, etc.)
@@ -400,6 +405,80 @@ User* getCurrentUser(HTTPServerRequest req)
         return getUserFromSession(req.cookies["session_id"]);
     }
     return null;
+}
+
+void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
+{
+    auto currentUser = getCurrentUser(req);
+    string username = currentUser ? currentUser.username : "";
+    bool isLoggedIn = currentUser !is null;
+    res.render!("ai-news.dt", req, username, isLoggedIn);
+}
+
+void getAINews(HTTPServerRequest req, HTTPServerResponse res)
+{
+    try {
+        // Simple RSS feeds for AI news
+        string[] feeds = [
+            "https://techcrunch.com/feed/",
+            "https://www.wired.com/feed/rss"
+        ];
+        
+        JSONValue[] allNews;
+        
+        foreach (feed; feeds) {
+            try {
+                auto content = get(feed);
+                auto news = parseSimpleRSS(cast(string)content);
+                allNews ~= news;
+            } catch (Exception e) {
+                logWarn("RSS feed failed: %s", e.msg);
+            }
+        }
+        
+        // Limit to 10 items
+        if (allNews.length > 10) {
+            allNews = allNews[0..10];
+        }
+        
+        res.writeJsonBody(JSONValue(allNews));
+    } catch (Exception e) {
+        logError("AI News error: %s", e.msg);
+        res.statusCode = 500;
+        res.writeJsonBody(JSONValue(["error": "Failed to load news"]));
+    }
+}
+
+JSONValue[] parseSimpleRSS(string content)
+{
+    JSONValue[] items;
+    
+    // Simple regex-based parsing (not perfect but works)
+    import std.regex;
+    auto titleRegex = regex(r"<title><!\[CDATA\[(.*?)\]\]></title>");
+    auto linkRegex = regex(r"<link>(.*?)</link>");
+    auto descRegex = regex(r"<description><!\[CDATA\[(.*?)\]\]></description>");
+    
+    auto titleMatches = matchAll(content, titleRegex);
+    auto linkMatches = matchAll(content, linkRegex);
+    auto descMatches = matchAll(content, descRegex);
+    
+    auto titles = titleMatches.array;
+    auto links = linkMatches.array;
+    auto descs = descMatches.array;
+    
+    for (size_t i = 0; i < titles.length && i < 5; i++) {
+        JSONValue item = JSONValue.emptyObject;
+        item["title"] = JSONValue(titles[i][1].to!string);
+        item["url"] = JSONValue(i < links.length ? links[i][1].to!string : "");
+        item["summary"] = JSONValue(i < descs.length ? descs[i][1].to!string[0..min(150, descs[i][1].to!string.length)] ~ "..." : "");
+        item["date"] = JSONValue("Recent");
+        item["source"] = JSONValue("Tech News");
+        
+        items ~= item;
+    }
+    
+    return items;
 }
 
 // Password hashing functions are now in repositories_clean.d
