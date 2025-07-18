@@ -616,47 +616,22 @@ class PostgreSQL {
     void createSchema() {
         logInfo("Creating database schema if it doesn't exist...");
         
-        // Create users table
-        execNonQuery(`
-            CREATE TABLE IF NOT EXISTS users (
-                id VARCHAR(36) PRIMARY KEY,
-                username VARCHAR(100) UNIQUE NOT NULL,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP NOT NULL,
-                is_active BOOLEAN NOT NULL DEFAULT TRUE
-            )
-        `);
+        // Use migration manager to handle schema creation and updates
+        import migrations : MigrationManager;
+        auto migrationManager = new MigrationManager(client);
         
-        // Create messages table
-        execNonQuery(`
-            CREATE TABLE IF NOT EXISTS messages (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                message TEXT NOT NULL,
-                timestamp TIMESTAMP NOT NULL,
-                user_id VARCHAR(36) NULL REFERENCES users(id)
-            )
-        `);
-        
-        // Create sessions table
-        execNonQuery(`
-            CREATE TABLE IF NOT EXISTS sessions (
-                session_id VARCHAR(36) PRIMARY KEY,
-                user_id VARCHAR(36) NOT NULL REFERENCES users(id),
-                created_at TIMESTAMP NOT NULL,
-                expires_at TIMESTAMP NOT NULL
-            )
-        `);
-        
-        // Create indexes
-        execNonQuery("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
-        execNonQuery("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
-        execNonQuery("CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp)");
-        execNonQuery("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
-        
-        logInfo("Database schema created successfully");
+        try {
+            // Apply all pending migrations
+            if (migrationManager.applyMigrations()) {
+                logInfo("Database schema created/updated successfully");
+            } else {
+                logError("Failed to apply all migrations");
+                throw new Exception("Database schema migration failed");
+            }
+        } catch (Exception e) {
+            logError("Failed to create/update database schema: %s", e.msg);
+            throw e;
+        }
     }
     
     /**

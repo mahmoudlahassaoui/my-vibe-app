@@ -6,5 +6,18 @@
     "dependencies": {
         "vibe-d": "~>0.9",
         "vibe-d:postgresql": "~>0.9"
-    }
+    },
+    "subPackages": [
+        {
+            "name": "migrator",
+            "targetType": "executable",
+            "targetName": "migrator",
+            "sourcePaths": ["source"],
+            "mainSourceFile": "source/migrator.d",
+            "dependencies": {
+                "vibe-d": "~>0.9",
+                "vibe-d:postgresql": "~>0.9"
+            }
+        }
+    ]
 }

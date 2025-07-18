@@ -88,15 +88,34 @@ void initializeRepositories(DatabaseConfig config)
 {
     logInfo("Initializing repositories...");
     
-    // Create repository factory
-    auto factory = new RepositoryFactory(config);
-    
-    // Create repositories
-    userRepository = factory.createUserRepository();
-    messageRepository = factory.createMessageRepository();
-    sessionRepository = factory.createSessionRepository(userRepository);
-    
-    logInfo("Repositories initialized successfully");
+    try {
+        // Create repository factory
+        auto factory = new RepositoryFactory(config);
+        
+        // Create repositories
+        userRepository = factory.createUserRepository();
+        messageRepository = factory.createMessageRepository();
+        sessionRepository = factory.createSessionRepository(userRepository);
+        
+        logInfo("Repositories initialized successfully");
+    } 
+    catch (Exception e) {
+        logError("Failed to initialize repositories: %s", e.msg);
+        logWarn("Falling back to JSON storage");
+        
+        // Force JSON storage in case of database failure
+        config.useDatabase = false;
+        
+        // Create JSON repositories directly
+        userRepository = new JSONUserRepository();
+        messageRepository = new JSONMessageRepository();
+        sessionRepository = new JSONSessionRepository(userRepository);
+        
+        // Initialize data directory for JSON storage
+        initializeDataDirectory();
+        
+        logInfo("JSON repositories initialized as fallback");
+    }
 }
 
 void homePage(HTTPServerRequest req, HTTPServerResponse res)
