@@ -3,7 +3,7 @@ html
   head
     title AI News - My Vibe.d App
     link(rel="stylesheet", href="/style.css")
-    script(src="/script.js")
+    script(src="/script-ai-news.js")
   body
     nav
       ul

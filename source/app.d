@@ -11,6 +11,7 @@ import std.random;
 import std.string;
 import std.net.curl;
 import std.xml;
+import std.algorithm : min, canFind;
 
 // Structure to store contact messages
 struct ContactMessage {
@@ -186,33 +187,38 @@ void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
 void getRSSNews(HTTPServerRequest req, HTTPServerResponse res)
 {
     try {
-        // AI news RSS feeds
+        // Reliable AI news RSS feeds
         string[] rssFeeds = [
-            "https://feeds.feedburner.com/oreilly/radar",
-            "https://www.artificialintelligence-news.com/feed/",
-            "https://venturebeat.com/ai/feed/",
-            "https://techcrunch.com/category/artificial-intelligence/feed/"
+            "https://rss.cnn.com/rss/edition.rss",
+            "https://feeds.bbci.co.uk/news/technology/rss.xml",
+            "https://techcrunch.com/feed/",
+            "https://www.wired.com/feed/rss"
         ];
         
         JSONValue[] allNews;
         
         foreach (feed; rssFeeds) {
             try {
+                logInfo("Fetching RSS feed: %s", feed);
                 auto content = get(feed);
-                auto news = parseRSSFeed(cast(string)content);
+                auto news = parseRSSFeed(cast(string)content, feed);
                 allNews ~= news;
+                logInfo("Successfully parsed %d items from %s", news.length, feed);
             } catch (Exception e) {
                 logWarn("Failed to fetch RSS feed %s: %s", feed, e.msg);
             }
         }
         
-        // Sort by date and limit to 20 items
+        // Sort by date and limit to 15 items
         import std.algorithm : sort;
-        allNews.sort!((a, b) => a["date"].str > b["date"].str);
-        if (allNews.length > 20) {
-            allNews = allNews[0..20];
+        if (allNews.length > 0) {
+            allNews.sort!((a, b) => a["date"].str > b["date"].str);
+            if (allNews.length > 15) {
+                allNews = allNews[0..15];
+            }
         }
         
+        logInfo("Returning %d news items", allNews.length);
         res.writeJsonBody(JSONValue(allNews));
     } catch (Exception e) {
         logError("RSS feed error: %s", e.msg);
@@ -221,13 +227,15 @@ void getRSSNews(HTTPServerRequest req, HTTPServerResponse res)
     }
 }
 
-JSONValue[] parseRSSFeed(string xmlContent)
+JSONValue[] parseRSSFeed(string xmlContent, string feedUrl)
 {
     JSONValue[] items;
     
     try {
         auto doc = new Document(xmlContent);
         auto itemNodes = doc.getElementsByTagName("item");
+        
+        string sourceName = getSourceName(feedUrl);
         
         foreach (node; itemNodes) {
             auto titleNode = node.getElementsByTagName("title");
@@ -237,11 +245,11 @@ JSONValue[] parseRSSFeed(string xmlContent)
             
             if (titleNode.length > 0 && linkNode.length > 0) {
                 JSONValue item = JSONValue.emptyObject;
-                item["title"] = JSONValue(titleNode[0].getCData());
+                item["title"] = JSONValue(cleanText(titleNode[0].getCData()));
                 item["url"] = JSONValue(linkNode[0].getCData());
-                item["summary"] = descNode.length > 0 ? JSONValue(stripHTML(descNode[0].getCData())) : JSONValue("");
-                item["date"] = pubDateNode.length > 0 ? JSONValue(formatDate(pubDateNode[0].getCData())) : JSONValue("");
-                item["source"] = JSONValue("AI News");
+                item["summary"] = descNode.length > 0 ? JSONValue(stripHTML(descNode[0].getCData())[0..min(200, stripHTML(descNode[0].getCData()).length)] ~ "...") : JSONValue("Click to read more...");
+                item["date"] = pubDateNode.length > 0 ? JSONValue(formatDate(pubDateNode[0].getCData())) : JSONValue(Clock.currTime().toISOExtString()[0..10]);
+                item["source"] = JSONValue(sourceName);
                 item["category"] = JSONValue("tech");
                 
                 items ~= item;
@@ -252,6 +260,23 @@ JSONValue[] parseRSSFeed(string xmlContent)
     }
     
     return items;
+}
+
+string getSourceName(string feedUrl)
+{
+    if (feedUrl.canFind("cnn")) return "CNN";
+    if (feedUrl.canFind("bbc")) return "BBC";
+    if (feedUrl.canFind("techcrunch")) return "TechCrunch";
+    if (feedUrl.canFind("wired")) return "Wired";
+    return "Tech News";
+}
+
+string cleanText(string text)
+{
+    import std.regex;
+    auto htmlTags = regex(r"<[^>]*>");
+    auto cleaned = replaceAll(text, htmlTags, "");
+    return cleaned.length > 100 ? cleaned[0..100] ~ "..." : cleaned;
 }
 
 string stripHTML(string html)
