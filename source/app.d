@@ -131,7 +131,8 @@ void homePage(HTTPServerRequest req, HTTPServerResponse res)
     auto currentUser = getCurrentUser(req);
     string username = currentUser ? currentUser.username : "";
     bool isLoggedIn = currentUser !is null;
-    res.render!("index.dt", req, messageCount, username, isLoggedIn);
+    bool showAINews = true; // Force AI News to show
+    res.render!("index.dt", req, messageCount, username, isLoggedIn, showAINews);
 }
 
 void contactPage(HTTPServerRequest req, HTTPServerResponse res)
