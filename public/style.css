@@ -370,6 +370,19 @@ nav li {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    user-select: none;
+}
+
+.clickable-indicator {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-left: 8px;
+    animation: bounce-hint 2s infinite;
+}
+
+@keyframes bounce-hint {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(-2px); opacity: 1; }
 }
 
 .news-card::before {
