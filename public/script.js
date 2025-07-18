@@ -22,3 +22,7 @@ function applyPalette(name) {
   document.body.style.backgroundColor = colors[name];
   localStorage.setItem('vibeAppBackgroundColor', colors[name]);
 }
+
+function gameClick(color) {
+  alert('Game tile clicked: ' + color);
+}
