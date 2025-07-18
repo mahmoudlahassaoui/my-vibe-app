@@ -9,9 +9,6 @@ import std.uuid;
 import std.digest.sha;
 import std.random;
 import std.string;
-import std.net.curl;
-import std.xml;
-import std.algorithm : min, canFind;
 
 // Structure to store contact messages
 struct ContactMessage {
@@ -73,8 +70,7 @@ void main()
     router.get("/contact", &contactPage);
     router.post("/contact", &handleContact);
     router.get("/messages", &messagesPage);
-    router.get("/ai-news", &aiNewsPage);
-    router.get("/api/rss-news", &getRSSNews);
+
     
     // Serve static files (CSS, images, etc.)
     router.get("*", serveStaticFiles("public/"));
@@ -176,108 +172,7 @@ void messagesPage(HTTPServerRequest req, HTTPServerResponse res)
     res.render!("messages.dt", req, messages);
 }
 
-void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
-{
-    auto currentUser = getCurrentUser(req);
-    string username = currentUser ? currentUser.username : "";
-    bool isLoggedIn = currentUser !is null;
-    res.render!("ai-news.dt", req, username, isLoggedIn);
-}
 
-void getRSSNews(HTTPServerRequest req, HTTPServerResponse res)
-{
-    try {
-        // Reliable AI news RSS feeds
-        string[] rssFeeds = [
-            "https://rss.cnn.com/rss/edition.rss",
-            "https://feeds.bbci.co.uk/news/technology/rss.xml",
-            "https://techcrunch.com/feed/",
-            "https://www.wired.com/feed/rss"
-        ];
-        
-        JSONValue[] allNews;
-        
-        foreach (feed; rssFeeds) {
-            try {
-                logInfo("Fetching RSS feed: %s", feed);
-                auto content = get(feed);
-                auto news = parseRSSFeed(cast(string)content, feed);
-                allNews ~= news;
-                logInfo("Successfully parsed %d items from %s", news.length, feed);
-            } catch (Exception e) {
-                logWarn("Failed to fetch RSS feed %s: %s", feed, e.msg);
-            }
-        }
-        
-        // Sort by date and limit to 15 items
-        import std.algorithm : sort;
-        if (allNews.length > 0) {
-            allNews.sort!((a, b) => a["date"].str > b["date"].str);
-            if (allNews.length > 15) {
-                allNews = allNews[0..15];
-            }
-        }
-        
-        logInfo("Returning %d news items", allNews.length);
-        res.writeJsonBody(JSONValue(allNews));
-    } catch (Exception e) {
-        logError("RSS feed error: %s", e.msg);
-        res.statusCode = 500;
-        res.writeJsonBody(JSONValue(["error": JSONValue("Failed to fetch news")]));
-    }
-}
-
-JSONValue[] parseRSSFeed(string xmlContent, string feedUrl)
-{
-    JSONValue[] items;
-    
-    try {
-        auto doc = new Document(xmlContent);
-        auto itemNodes = doc.getElementsByTagName("item");
-        
-        string sourceName = getSourceName(feedUrl);
-        
-        foreach (node; itemNodes) {
-            auto titleNode = node.getElementsByTagName("title");
-            auto linkNode = node.getElementsByTagName("link");
-            auto descNode = node.getElementsByTagName("description");
-            auto pubDateNode = node.getElementsByTagName("pubDate");
-            
-            if (titleNode.length > 0 && linkNode.length > 0) {
-                JSONValue item = JSONValue.emptyObject;
-                item["title"] = JSONValue(cleanText(titleNode[0].getCData()));
-                item["url"] = JSONValue(linkNode[0].getCData());
-                item["summary"] = descNode.length > 0 ? JSONValue(stripHTML(descNode[0].getCData())[0..min(200, stripHTML(descNode[0].getCData()).length)] ~ "...") : JSONValue("Click to read more...");
-                item["date"] = pubDateNode.length > 0 ? JSONValue(formatDate(pubDateNode[0].getCData())) : JSONValue(Clock.currTime().toISOExtString()[0..10]);
-                item["source"] = JSONValue(sourceName);
-                item["category"] = JSONValue("tech");
-                
-                items ~= item;
-            }
-        }
-    } catch (Exception e) {
-        logWarn("XML parsing error: %s", e.msg);
-    }
-    
-    return items;
-}
-
-string getSourceName(string feedUrl)
-{
-    if (feedUrl.canFind("cnn")) return "CNN";
-    if (feedUrl.canFind("bbc")) return "BBC";
-    if (feedUrl.canFind("techcrunch")) return "TechCrunch";
-    if (feedUrl.canFind("wired")) return "Wired";
-    return "Tech News";
-}
-
-string cleanText(string text)
-{
-    import std.regex;
-    auto htmlTags = regex(r"<[^>]*>");
-    auto cleaned = replaceAll(text, htmlTags, "");
-    return cleaned.length > 100 ? cleaned[0..100] ~ "..." : cleaned;
-}
 
 string stripHTML(string html)
 {
