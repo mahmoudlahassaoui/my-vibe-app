@@ -4,19 +4,19 @@
     "authors": ["Mahmoud Lahassaoui"],
     "license": "proprietary",
     "dependencies": {
-        "vibe-d": "~>0.9",
-        "vibe-d:postgresql": "~>0.9"
+        "vibe-d": "~>0.9"
     },
+    "excludedSourceFiles": ["source/migrator_simple.d"],
     "subPackages": [
         {
             "name": "migrator",
             "targetType": "executable",
             "targetName": "migrator",
             "sourcePaths": ["source"],
-            "mainSourceFile": "source/migrator.d",
+            "sourceFiles": ["source/migrator_simple.d", "source/repositories_clean.d", "source/dbconfig.d"],
+            "mainSourceFile": "source/migrator_simple.d",
             "dependencies": {
-                "vibe-d": "~>0.9",
-                "vibe-d:postgresql": "~>0.9"
+                "vibe-d": "~>0.9"
             }
         }
     ]

@@ -39,7 +39,7 @@ struct UserSession {
 }
 
 // Import repository interfaces and factory
-import repositories;
+import repositories_clean : IUserRepository, IMessageRepository, ISessionRepository, RepositoryFactory;
 import dbconfig;
 
 // Global repository instances
@@ -107,6 +107,7 @@ void initializeRepositories(DatabaseConfig config)
         config.useDatabase = false;
         
         // Create JSON repositories directly
+        import repositories_clean : JSONUserRepository, JSONMessageRepository, JSONSessionRepository;
         userRepository = new JSONUserRepository();
         messageRepository = new JSONMessageRepository();
         sessionRepository = new JSONSessionRepository(userRepository);
@@ -389,36 +390,4 @@ User* getCurrentUser(HTTPServerRequest req)
     return null;
 }
 
-// ============ PASSWORD HASHING FUNCTIONS ============
-
-string generateSalt()
-{
-    auto rnd = Random(unpredictableSeed);
-    char[] salt;
-    salt.length = 16;
-    
-    foreach (ref c; salt) {
-        c = cast(char)('a' + uniform(0, 26, rnd));
-    }
-    
-    return salt.idup;
-}
-
-string hashPassword(string password, string salt)
-{
-    auto combined = password ~ salt;
-    auto hash = sha256Of(combined);
-    return salt ~ ":" ~ toHexString(hash).idup;
-}
-
-bool checkPassword(string password, string storedHash)
-{
-    auto parts = storedHash.split(":");
-    if (parts.length != 2) {
-        return false;
-    }
-    
-    auto salt = parts[0];
-    auto expectedHash = hashPassword(password, salt);
-    return expectedHash == storedHash;
-}
+// Password hashing functions are now in repositories_clean.d
