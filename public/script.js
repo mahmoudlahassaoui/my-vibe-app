@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Enhanced AI News functionality
 function loadAINews() {
-    console.log('📰 Loading AI News... (Cache bust: ' + Date.now() + ')');
+    console.log('📰 Loading AI News v2.0... (Cache bust: ' + Date.now() + ')');
 
     var container = document.getElementById('news-container');
     var loadingStatus = document.getElementById('loading-status');
@@ -513,7 +513,7 @@ function loadAINews() {
 
     // Simulate loading delay for realistic experience
     setTimeout(function () {
-        // Enhanced news data with real, working sources and links (updated weekly)
+        // Enhanced news data with real, working sources and links (updated weekly - v2.0)
         var news = [
             {
                 title: 'Claude 3.5 Sonnet Computer Use Feature Expansion',
@@ -583,6 +583,7 @@ function loadAINews() {
 
         // Debug: Log the dates being used
         console.log('📅 News dates loaded:', news.map(function (item) { return item.date; }));
+        console.log('✅ AI News v2.0 loaded successfully with current week dates!');
 
         container.innerHTML = '';
 
