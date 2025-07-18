@@ -4,6 +4,7 @@
     "authors": ["Mahmoud Lahassaoui"],
     "license": "proprietary",
     "dependencies": {
-        "vibe-d": "~>0.9"
+        "vibe-d": "~>0.9",
+        "vibe-d:postgresql": "~>0.9"
     }
 }

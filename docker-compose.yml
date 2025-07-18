@@ -9,19 +9,34 @@ services:
       - ./data:/app/data
     environment:
       - NODE_ENV=production
+      - USE_DATABASE=true
+      - DB_TYPE=postgresql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vibeapp
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_password
+      - DB_POOL_SIZE=5
+      - DB_CONNECTION_TIMEOUT=30
     restart: unless-stopped
+    depends_on:
+      - postgres
     
-  # Ready for PostgreSQL when you want to upgrade!
-  # postgres:
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_DB: vibeapp
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: your_secure_password
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: vibeapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:

@@ -81,8 +81,37 @@ Copy `.env.production` and customize:
 - Security keys
 - Domain configuration
 
-### Database Upgrade
-Ready for PostgreSQL - just uncomment in `docker-compose.yml`
+### PostgreSQL Database Configuration
+The application supports both JSON file storage and PostgreSQL database storage. To use PostgreSQL:
+
+1. Set the following environment variables:
+   ```
+   USE_DATABASE=true
+   DB_TYPE=postgresql
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=vibeapp
+   DB_USER=postgres
+   DB_PASSWORD=your_password
+   DB_POOL_SIZE=5
+   DB_CONNECTION_TIMEOUT=30
+   ```
+
+2. If using Docker, the PostgreSQL service is already configured in `docker-compose.yml`.
+
+3. To migrate existing data from JSON to PostgreSQL, use the migration tool:
+   ```bash
+   # Run the migrator
+   dub run :migrator
+
+   # For a dry run (no changes)
+   dub run :migrator -- --dry-run
+
+   # For selective migration
+   dub run :migrator -- --users-only
+   dub run :migrator -- --messages-only
+   dub run :migrator -- --sessions-only
+   ```
 
 ## 🤝 Contributing
 

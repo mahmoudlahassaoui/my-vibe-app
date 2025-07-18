@@ -38,13 +38,22 @@ struct UserSession {
     SysTime expiresAt;
 }
 
-// Database configuration - ready for PostgreSQL when needed
-bool useDatabase = false;
+// Import repository interfaces and factory
+import repositories;
+import dbconfig;
+
+// Global repository instances
+private IUserRepository userRepository;
+private IMessageRepository messageRepository;
+private ISessionRepository sessionRepository;
 
 void main()
 {
-    // Initialize database
-    initializeDatabase();
+    // Load database configuration
+    auto dbConfig = loadDatabaseConfig();
+    
+    // Initialize repositories
+    initializeRepositories(dbConfig);
     
     // Create HTTP server settings
     auto settings = new HTTPServerSettings;
@@ -70,6 +79,24 @@ void main()
     listenHTTP(settings, router);
     logInfo("Server running on http://localhost:8080");
     runApplication();
+}
+
+/**
+ * Initialize repositories based on configuration
+ */
+void initializeRepositories(DatabaseConfig config)
+{
+    logInfo("Initializing repositories...");
+    
+    // Create repository factory
+    auto factory = new RepositoryFactory(config);
+    
+    // Create repositories
+    userRepository = factory.createUserRepository();
+    messageRepository = factory.createMessageRepository();
+    sessionRepository = factory.createSessionRepository(userRepository);
+    
+    logInfo("Repositories initialized successfully");
 }
 
 void homePage(HTTPServerRequest req, HTTPServerResponse res)
@@ -133,15 +160,8 @@ void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
     res.render!("ai-news.dt", req, username, isLoggedIn);
 }
 
-// Production-ready JSON storage initialization
-void initializeDatabase()
-{
-    logInfo("Initializing production-ready JSON storage...");
-    initializeJSONStorage();
-}
-
-// Production-ready JSON storage initialization
-void initializeJSONStorage()
+// Initialize data directory for JSON storage
+void initializeDataDirectory()
 {
     // Create data directory if it doesn't exist
     if (!exists("data")) {
@@ -163,115 +183,25 @@ void initializeJSONStorage()
         logInfo("Created sessions.json");
     }
     
-    logInfo("Production-ready JSON storage initialized successfully");
+    logInfo("Data directory initialized successfully");
 }
 
-// Future PostgreSQL table creation (ready for database upgrade)
-void createTables()
-{
-    // This function is ready for PostgreSQL integration
-    // For now, using production-ready JSON storage
-    logInfo("Using JSON storage - PostgreSQL tables ready for future upgrade");
-}
-
-// Save message to production-ready JSON storage
+// Save message using repository
 void saveMessage(string name, string email, string message)
 {
-    saveMessageJSON(name, email, message);
+    messageRepository.saveMessage(name, email, message);
 }
 
-// Fallback JSON message storage
-void saveMessageJSON(string name, string email, string message)
-{
-    auto messages = getAllMessagesJSON();
-    
-    // Find next ID
-    int nextId = 1;
-    if (messages.length > 0) {
-        nextId = messages.map!(m => m.id).maxElement + 1;
-    }
-    
-    // Create new message
-    ContactMessage newMsg = {
-        id: nextId,
-        name: name,
-        email: email,
-        message: message,
-        timestamp: Clock.currTime()
-    };
-    
-    messages ~= newMsg;
-    
-    // Save to JSON file
-    saveAllMessagesJSON(messages);
-}
-
-// Get all messages from production-ready JSON storage
+// Get all messages using repository
 ContactMessage[] getAllMessages()
 {
-    return getAllMessagesJSON();
+    return messageRepository.getAllMessages();
 }
 
-// Fallback JSON message retrieval
-ContactMessage[] getAllMessagesJSON()
-{
-    if (!exists("data/messages.json")) {
-        return [];
-    }
-    
-    try {
-        auto jsonText = readText("data/messages.json");
-        auto jsonArray = parseJSON(jsonText).array;
-        
-        ContactMessage[] messages;
-        foreach (jsonMsg; jsonArray) {
-            ContactMessage msg;
-            msg.id = jsonMsg["id"].integer.to!int;
-            msg.name = jsonMsg["name"].str;
-            msg.email = jsonMsg["email"].str;
-            msg.message = jsonMsg["message"].str;
-            msg.timestamp = SysTime.fromISOExtString(jsonMsg["timestamp"].str);
-            if ("userId" in jsonMsg) {
-                msg.userId = jsonMsg["userId"].str;
-            }
-            messages ~= msg;
-        }
-        
-        // Sort by ID descending (newest first)
-        messages.sort!((a, b) => a.id > b.id);
-        return messages;
-    }
-    catch (Exception e) {
-        logError("Error reading messages: %s", e.msg);
-        return [];
-    }
-}
-
-// Save all messages to JSON file
-void saveAllMessagesJSON(ContactMessage[] messages)
-{
-    JSONValue[] jsonArray;
-    
-    foreach (msg; messages) {
-        JSONValue jsonMsg = JSONValue([
-            "id": JSONValue(msg.id),
-            "name": JSONValue(msg.name),
-            "email": JSONValue(msg.email),
-            "message": JSONValue(msg.message),
-            "timestamp": JSONValue(msg.timestamp.toISOExtString()),
-            "userId": JSONValue(msg.userId)
-        ]);
-        jsonArray ~= jsonMsg;
-    }
-    
-    auto jsonData = JSONValue(jsonArray);
-    std.file.write("data/messages.json", jsonData.toPrettyString());
-}
-
-// Get message count from JSON file
+// Get message count using repository
 long getMessageCount()
 {
-    return getAllMessages().length;
+    return messageRepository.getMessageCount();
 }
 
 // ============ AUTHENTICATION FUNCTIONS ============
@@ -279,213 +209,77 @@ long getMessageCount()
 // User management functions
 User[] getAllUsers()
 {
-    return getAllUsersJSON();
-}
-
-// Fallback JSON user retrieval
-User[] getAllUsersJSON()
-{
-    if (!exists("data/users.json")) {
-        return [];
-    }
-    
-    try {
-        auto jsonText = readText("data/users.json");
-        auto jsonArray = parseJSON(jsonText).array;
-        
-        User[] users;
-        foreach (jsonUser; jsonArray) {
-            User user;
-            user.id = jsonUser["id"].str;
-            user.username = jsonUser["username"].str;
-            user.email = jsonUser["email"].str;
-            user.passwordHash = jsonUser["passwordHash"].str;
-            user.createdAt = SysTime.fromISOExtString(jsonUser["createdAt"].str);
-            user.isActive = jsonUser["isActive"].boolean;
-            users ~= user;
-        }
-        return users;
-    }
-    catch (Exception e) {
-        logError("Error reading users: %s", e.msg);
-        return [];
-    }
-}
-
-void saveAllUsersJSON(User[] users)
-{
-    JSONValue[] jsonArray;
-    
-    foreach (user; users) {
-        JSONValue jsonUser = JSONValue([
-            "id": JSONValue(user.id),
-            "username": JSONValue(user.username),
-            "email": JSONValue(user.email),
-            "passwordHash": JSONValue(user.passwordHash),
-            "createdAt": JSONValue(user.createdAt.toISOExtString()),
-            "isActive": JSONValue(user.isActive)
-        ]);
-        jsonArray ~= jsonUser;
-    }
-    
-    auto jsonData = JSONValue(jsonArray);
-    std.file.write("data/users.json", jsonData.toPrettyString());
+    return userRepository.getAllUsers();
 }
 
 User* findUserByUsername(string username)
 {
-    auto users = getAllUsers();
-    foreach (ref user; users) {
-        if (user.username == username) {
-            return &user;
-        }
-    }
-    return null;
+    return userRepository.findUserByUsername(username);
 }
 
 User* findUserByEmail(string email)
 {
-    auto users = getAllUsers();
-    foreach (ref user; users) {
-        if (user.email == email) {
-            return &user;
-        }
-    }
-    return null;
+    return userRepository.findUserByEmail(email);
 }
 
 bool createUser(string username, string email, string password)
 {
-    // Check if user already exists
-    if (findUserByUsername(username) || findUserByEmail(email)) {
-        return false;
-    }
-    
-    auto users = getAllUsers();
-    
-    User newUser = {
-        id: randomUUID().toString(),
-        username: username,
-        email: email,
-        passwordHash: hashPassword(password, generateSalt()),
-        createdAt: Clock.currTime(),
-        isActive: true
-    };
-    
-    users ~= newUser;
-    saveAllUsersJSON(users);
-    logInfo("User created: %s", username);
-    return true;
+    return userRepository.createUser(username, email, password);
 }
 
 bool verifyPassword(string password, string hash)
 {
-    return checkPassword(password, hash);
+    // Split hash to get salt and hash
+    auto parts = hash.split(":");
+    if (parts.length != 2) {
+        return false;
+    }
+    
+    auto salt = parts[0];
+    auto expectedHash = hashPassword(password, salt);
+    return expectedHash == hash;
+}
+
+// Helper functions for password handling
+string generateSalt()
+{
+    auto rnd = Random(unpredictableSeed);
+    char[] salt;
+    salt.length = 16;
+    
+    foreach (ref c; salt) {
+        c = cast(char)('a' + uniform(0, 26, rnd));
+    }
+    
+    return salt.idup;
+}
+
+string hashPassword(string password, string salt)
+{
+    auto combined = password ~ salt;
+    auto hash = sha256Of(combined);
+    return salt ~ ":" ~ toHexString(hash).idup;
 }
 
 // Session management
 UserSession[] getAllSessions()
 {
-    return getAllSessionsJSON();
-}
-
-// Fallback JSON session retrieval
-UserSession[] getAllSessionsJSON()
-{
-    if (!exists("data/sessions.json")) {
-        return [];
-    }
-    
-    try {
-        auto jsonText = readText("data/sessions.json");
-        auto jsonArray = parseJSON(jsonText).array;
-        
-        UserSession[] sessions;
-        foreach (jsonSession; jsonArray) {
-            UserSession session;
-            session.sessionId = jsonSession["sessionId"].str;
-            session.userId = jsonSession["userId"].str;
-            session.createdAt = SysTime.fromISOExtString(jsonSession["createdAt"].str);
-            session.expiresAt = SysTime.fromISOExtString(jsonSession["expiresAt"].str);
-            sessions ~= session;
-        }
-        return sessions;
-    }
-    catch (Exception e) {
-        logError("Error reading sessions: %s", e.msg);
-        return [];
-    }
-}
-
-void saveAllSessionsJSON(UserSession[] sessions)
-{
-    JSONValue[] jsonArray;
-    
-    foreach (session; sessions) {
-        JSONValue jsonSession = JSONValue([
-            "sessionId": JSONValue(session.sessionId),
-            "userId": JSONValue(session.userId),
-            "createdAt": JSONValue(session.createdAt.toISOExtString()),
-            "expiresAt": JSONValue(session.expiresAt.toISOExtString())
-        ]);
-        jsonArray ~= jsonSession;
-    }
-    
-    auto jsonData = JSONValue(jsonArray);
-    std.file.write("data/sessions.json", jsonData.toPrettyString());
+    return sessionRepository.getAllSessions();
 }
 
 string createSession(string userId)
 {
-    return createSessionJSON(userId);
-}
-
-// Fallback JSON session creation
-string createSessionJSON(string userId)
-{
-    auto sessions = getAllSessionsJSON();
-    
-    UserSession newSession = {
-        sessionId: randomUUID().toString(),
-        userId: userId,
-        createdAt: Clock.currTime(),
-        expiresAt: Clock.currTime() + 7.days
-    };
-    
-    sessions ~= newSession;
-    saveAllSessionsJSON(sessions);
-    return newSession.sessionId;
+    return sessionRepository.createSession(userId);
 }
 
 User* getUserFromSession(string sessionId)
 {
-    auto sessions = getAllSessions();
-    auto now = Clock.currTime();
-    
-    foreach (session; sessions) {
-        if (session.sessionId == sessionId && session.expiresAt > now) {
-            auto users = getAllUsers();
-            foreach (ref user; users) {
-                if (user.id == session.userId) {
-                    return &user;
-                }
-            }
-        }
-    }
-    return null;
+    return sessionRepository.getUserFromSession(sessionId);
 }
 
 void deleteSession(string sessionId)
 {
-    deleteSessionJSON(sessionId);
-}
-
-// Fallback JSON session deletion
-void deleteSessionJSON(string sessionId)
-{
-    auto sessions = getAllSessionsJSON();
-    sessions = sessions.filter!(s => s.sessionId != sessionId).array;
-    saveAllSessionsJSON(sessions);
+    sessionRepository.deleteSession(sessionId);
 }
 
 // ============ AUTHENTICATION ROUTE HANDLERS ============
