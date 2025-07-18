@@ -34,7 +34,9 @@ docker-compose up -d
 
 ## 🌐 Live Demo
 
-Visit the application at: `http://localhost:8080`
+**🚀 LIVE PRODUCTION APP:** https://mahmoud-amazing-vibe-app.onrender.com/
+
+**Local Development:** `http://localhost:8080`
 
 ### Test Accounts
 - Create your own account via the registration page

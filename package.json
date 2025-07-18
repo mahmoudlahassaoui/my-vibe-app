@@ -1,0 +1,24 @@
+{
+  "name": "my-vibe-app",
+  "version": "1.0.0",
+  "description": "Production-ready Vibe.d web application with database support",
+  "author": "Mahmoud Lahassaoui",
+  "license": "proprietary",
+  "homepage": "https://mahmoud-amazing-vibe-app.onrender.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mahmoudlahassaoui/my-vibe-app.git"
+  },
+  "scripts": {
+    "start": "dub run",
+    "build": "dub build",
+    "deploy": "git push origin main"
+  },
+  "keywords": [
+    "vibe-d",
+    "d-language",
+    "web-application",
+    "authentication",
+    "production-ready"
+  ]
+}

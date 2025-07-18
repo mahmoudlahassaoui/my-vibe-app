@@ -47,7 +47,7 @@ git push -u origin main
 
 ### Step 3: You're LIVE! 🎊
 - Build time: ~5 minutes
-- Your app will be at: `https://your-app-name.onrender.com`
+- **🚀 YOUR LIVE APP:** https://mahmoud-amazing-vibe-app.onrender.com/
 - **Accessible worldwide!**
 
 ## 🔥 What Makes Your App Special
