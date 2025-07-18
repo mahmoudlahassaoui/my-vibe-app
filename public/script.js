@@ -520,7 +520,7 @@ function loadAINews() {
                 category: 'claude',
                 date: '2025-07-17',
                 summary: 'Anthropic expands Claude\'s computer use capabilities with improved screen interaction and automation features for developers.',
-                url: 'https://www.anthropic.com/news/claude-3-5-sonnet-20241022',
+                url: 'https://www.anthropic.com/',
                 source: 'Anthropic'
             },
             {
@@ -528,7 +528,7 @@ function loadAINews() {
                 category: 'chatgpt',
                 date: '2025-07-16',
                 summary: 'OpenAI shares updates on GPT-5 development, highlighting significant improvements in reasoning and multimodal capabilities.',
-                url: 'https://openai.com/index/gpt-4-turbo/',
+                url: 'https://openai.com/',
                 source: 'OpenAI'
             },
             {
@@ -536,7 +536,7 @@ function loadAINews() {
                 category: 'llm',
                 date: '2025-07-15',
                 summary: 'Researchers publish breakthrough paper on efficient transformer architecture that dramatically reduces computational requirements.',
-                url: 'https://arxiv.org/list/cs.CL/recent',
+                url: 'https://arxiv.org/',
                 source: 'arXiv'
             },
             {
@@ -544,15 +544,15 @@ function loadAINews() {
                 category: 'tech',
                 date: '2025-07-14',
                 summary: 'European Union publishes comprehensive guidelines for AI Act compliance, affecting major tech companies globally.',
-                url: 'https://www.partnershiponai.org/',
-                source: 'Partnership on AI'
+                url: 'https://digital-strategy.ec.europa.eu/en/policies/european-approach-artificial-intelligence',
+                source: 'European Commission'
             },
             {
                 title: 'Claude API Rate Limits Increased for Enterprise Users',
                 category: 'claude',
                 date: '2025-07-13',
                 summary: 'Anthropic announces significant rate limit increases and new enterprise features for Claude API customers.',
-                url: 'https://docs.anthropic.com/en/docs/welcome',
+                url: 'https://docs.anthropic.com/',
                 source: 'Anthropic Docs'
             },
             {
@@ -560,7 +560,7 @@ function loadAINews() {
                 category: 'chatgpt',
                 date: '2025-07-12',
                 summary: 'OpenAI introduces real-time collaboration features in ChatGPT Canvas, enabling multiple users to work together.',
-                url: 'https://openai.com/index/chatgpt-plugins/',
+                url: 'https://openai.com/chatgpt/',
                 source: 'OpenAI Blog'
             },
             {
@@ -568,16 +568,16 @@ function loadAINews() {
                 category: 'tech',
                 date: '2025-07-11',
                 summary: 'Google demonstrates Gemini 2.0\'s advanced multimodal understanding with live video processing and real-time analysis.',
-                url: 'https://blog.google/technology/ai/google-gemini-ai/',
-                source: 'Google AI Blog'
+                url: 'https://gemini.google.com/',
+                source: 'Google AI'
             },
             {
                 title: 'Microsoft Copilot Studio Launches AI Agent Builder',
                 category: 'tech',
                 date: '2025-07-12',
                 summary: 'Microsoft releases new tools for building custom AI agents within Copilot Studio, targeting enterprise automation.',
-                url: 'https://blogs.microsoft.com/blog/category/ai/',
-                source: 'Microsoft Blog'
+                url: 'https://www.microsoft.com/en-us/microsoft-copilot/',
+                source: 'Microsoft'
             }
         ];
 
