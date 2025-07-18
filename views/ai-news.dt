@@ -39,8 +39,12 @@ html
         if (container) container.innerHTML = '';
         
         fetch('/api/ai-news')
-          .then(response => response.json())
+          .then(response => {
+            console.log('📡 API Response status:', response.status);
+            return response.json();
+          })
           .then(news => {
+            console.log('📰 Received news data:', news);
             if (loading) loading.style.display = 'none';
             displayNews(news, container);
           })
@@ -54,14 +58,41 @@ html
       function displayNews(news, container) {
         if (!container) return;
         
+        console.log('📰 Displaying news:', news);
+        
         news.forEach(article => {
           const card = document.createElement('div');
           card.className = 'news-card';
+          card.style.cursor = 'pointer';
           card.innerHTML = `
-            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+            <h3>${article.title}</h3>
             <p>${article.summary}</p>
             <small>📅 ${article.date} | 📰 ${article.source}</small>
+            <div style="margin-top: 10px; color: #007acc; font-weight: bold;">🔗 Click to read more</div>
           `;
+          
+          // Add click handler to entire card
+          card.addEventListener('click', function() {
+            console.log('🔗 Opening:', article.url);
+            if (article.url && article.url !== '') {
+              window.open(article.url, '_blank', 'noopener,noreferrer');
+            } else {
+              console.log('❌ No URL available for this article');
+              alert('Sorry, no link available for this article.');
+            }
+          });
+          
+          // Add hover effect
+          card.addEventListener('mouseenter', function() {
+            card.style.transform = 'translateY(-2px)';
+            card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+          });
+          
+          card.addEventListener('mouseleave', function() {
+            card.style.transform = 'translateY(0)';
+            card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+          });
+          
           container.appendChild(card);
         });
       }
