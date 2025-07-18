@@ -441,6 +441,17 @@ void getAINews(HTTPServerRequest req, HTTPServerResponse res)
             allNews = allNews[0..10];
         }
         
+        // If no news found, provide fallback
+        if (allNews.length == 0) {
+            JSONValue fallback = JSONValue.emptyObject;
+            fallback["title"] = JSONValue("AI News Coming Soon");
+            fallback["url"] = JSONValue("https://techcrunch.com/category/artificial-intelligence/");
+            fallback["summary"] = JSONValue("We're working on bringing you the latest AI news. Check back soon!");
+            fallback["date"] = JSONValue("Today");
+            fallback["source"] = JSONValue("System");
+            allNews ~= fallback;
+        }
+        
         res.writeJsonBody(JSONValue(allNews));
     } catch (Exception e) {
         logError("AI News error: %s", e.msg);
