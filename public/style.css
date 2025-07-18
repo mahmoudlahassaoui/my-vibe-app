@@ -355,34 +355,105 @@ nav li {
     font-size: 14px;
 }
 
-/* AI News styling */
+/* Enhanced AI News styling */
 .news-card {
     background: white;
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border-left: 4px solid #667eea;
     margin: 15px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.news-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.news-card:hover::before {
+    left: 100%;
 }
 
 .news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
 
 .news-card h3 {
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
-.news-card p {
+.news-card .news-summary {
     color: #666;
     line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+}
+
+.news-card .news-date {
+    color: #888;
+    font-size: 0.85em;
+    font-weight: bold;
+    margin: 0;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.news-card.claude {
+    border-left-color: #ff6b6b;
+}
+
+.news-card.chatgpt {
+    border-left-color: #4ecdc4;
+}
+
+.news-card.llm {
+    border-left-color: #98fb98;
+}
+
+.news-card.tech {
+    border-left-color: #ffa726;
 }
 
 .news-card.hidden {
     display: none;
+}
+
+.news-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+#loading-status {
+    font-size: 1.1em;
+    color: #667eea;
+    font-weight: bold;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.refresh-btn {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Filter buttons */
@@ -407,4 +478,194 @@ nav li {
     background: #007acc;
     color: white;
     border-color: #007acc;
+}
+
+/* 🎮 GAME ANIMATIONS AND EFFECTS */
+
+/* Confetti animation */
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Pulse fade effect for palette animations */
+@keyframes pulse-fade {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+}
+
+/* Shake animation for game over */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Enhanced button animations */
+.color-btn {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.color-btn:active {
+    transform: scale(0.95);
+}
+
+.game-btn {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.game-btn:active {
+    transform: scale(0.95);
+}
+
+.game-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Enhanced color tile animations */
+.color-tile {
+    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    overflow: hidden;
+}
+
+.color-tile::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+.color-tile:active::before {
+    width: 100%;
+    height: 100%;
+}
+
+/* Palette option enhanced animations */
+.palette-option {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.palette-option:active {
+    transform: scale(0.95);
+}
+
+/* Enhanced color dots with glow effect */
+.color-dot {
+    transition: all 0.3s ease;
+}
+
+.palette-option:hover .color-dot {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+/* Game score animation */
+#game-score {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Debug info enhanced styling */
+#debug-info {
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Hover effects for navigation */
+nav a {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #007acc;
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Enhanced form animations */
+input:focus, textarea:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 122, 204, 0.3);
+}
+
+/* Success and error message animations */
+.success, .error {
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+@keyframes slideInFromTop {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Loading animation for buttons */
+.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
