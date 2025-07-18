@@ -75,6 +75,7 @@ void main()
     router.get("/messages", &messagesPage);
     router.get("/ai-news", &aiNewsPage);
     router.get("/api/ai-news", &getAINews);
+    router.get("/test", (req, res) => res.writeBody("AI News routes are working!"));
 
     
     // Serve static files (CSS, images, etc.)
