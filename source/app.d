@@ -9,6 +9,8 @@ import std.uuid;
 import std.digest.sha;
 import std.random;
 import std.string;
+import std.net.curl;
+import std.xml;
 
 // Structure to store contact messages
 struct ContactMessage {
@@ -71,6 +73,7 @@ void main()
     router.post("/contact", &handleContact);
     router.get("/messages", &messagesPage);
     router.get("/ai-news", &aiNewsPage);
+    router.get("/api/rss-news", &getRSSNews);
     
     // Serve static files (CSS, images, etc.)
     router.get("*", serveStaticFiles("public/"));
@@ -178,6 +181,95 @@ void aiNewsPage(HTTPServerRequest req, HTTPServerResponse res)
     string username = currentUser ? currentUser.username : "";
     bool isLoggedIn = currentUser !is null;
     res.render!("ai-news.dt", req, username, isLoggedIn);
+}
+
+void getRSSNews(HTTPServerRequest req, HTTPServerResponse res)
+{
+    try {
+        // AI news RSS feeds
+        string[] rssFeeds = [
+            "https://feeds.feedburner.com/oreilly/radar",
+            "https://www.artificialintelligence-news.com/feed/",
+            "https://venturebeat.com/ai/feed/",
+            "https://techcrunch.com/category/artificial-intelligence/feed/"
+        ];
+        
+        JSONValue[] allNews;
+        
+        foreach (feed; rssFeeds) {
+            try {
+                auto content = get(feed);
+                auto news = parseRSSFeed(cast(string)content);
+                allNews ~= news;
+            } catch (Exception e) {
+                logWarn("Failed to fetch RSS feed %s: %s", feed, e.msg);
+            }
+        }
+        
+        // Sort by date and limit to 20 items
+        import std.algorithm : sort;
+        allNews.sort!((a, b) => a["date"].str > b["date"].str);
+        if (allNews.length > 20) {
+            allNews = allNews[0..20];
+        }
+        
+        res.writeJsonBody(JSONValue(allNews));
+    } catch (Exception e) {
+        logError("RSS feed error: %s", e.msg);
+        res.statusCode = 500;
+        res.writeJsonBody(JSONValue(["error": JSONValue("Failed to fetch news")]));
+    }
+}
+
+JSONValue[] parseRSSFeed(string xmlContent)
+{
+    JSONValue[] items;
+    
+    try {
+        auto doc = new Document(xmlContent);
+        auto itemNodes = doc.getElementsByTagName("item");
+        
+        foreach (node; itemNodes) {
+            auto titleNode = node.getElementsByTagName("title");
+            auto linkNode = node.getElementsByTagName("link");
+            auto descNode = node.getElementsByTagName("description");
+            auto pubDateNode = node.getElementsByTagName("pubDate");
+            
+            if (titleNode.length > 0 && linkNode.length > 0) {
+                JSONValue item = JSONValue.emptyObject;
+                item["title"] = JSONValue(titleNode[0].getCData());
+                item["url"] = JSONValue(linkNode[0].getCData());
+                item["summary"] = descNode.length > 0 ? JSONValue(stripHTML(descNode[0].getCData())) : JSONValue("");
+                item["date"] = pubDateNode.length > 0 ? JSONValue(formatDate(pubDateNode[0].getCData())) : JSONValue("");
+                item["source"] = JSONValue("AI News");
+                item["category"] = JSONValue("tech");
+                
+                items ~= item;
+            }
+        }
+    } catch (Exception e) {
+        logWarn("XML parsing error: %s", e.msg);
+    }
+    
+    return items;
+}
+
+string stripHTML(string html)
+{
+    import std.regex;
+    auto htmlTags = regex(r"<[^>]*>");
+    return replaceAll(html, htmlTags, "");
+}
+
+string formatDate(string pubDate)
+{
+    import std.datetime;
+    try {
+        // Simple date formatting - you might want to improve this
+        return pubDate.length > 10 ? pubDate[0..10] : pubDate;
+    } catch (Exception) {
+        return Clock.currTime().toISOExtString()[0..10];
+    }
 }
 
 // Initialize data directory for JSON storage

@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Enhanced AI News functionality
 function loadAINews() {
-    console.log('📰 Loading AI News v2.0... (Cache bust: ' + Date.now() + ')');
+    console.log('📰 Loading AI News from RSS feeds... (Cache bust: ' + Date.now() + ')');
 
     var container = document.getElementById('news-container');
     var loadingStatus = document.getElementById('loading-status');
@@ -507,14 +507,140 @@ function loadAINews() {
 
     // Show loading animation
     if (loadingStatus) {
-        loadingStatus.innerHTML = '🔄 Loading latest AI news...';
+        loadingStatus.innerHTML = '🔄 Loading latest AI news from RSS feeds...';
         loadingStatus.style.animation = 'pulse 1.5s infinite';
     }
 
-    // Simulate loading delay for realistic experience
-    setTimeout(function () {
-        // Enhanced news data with real, working sources and links (updated weekly - v2.0)
-        var news = [
+    // Fetch real RSS news from backend
+    fetch('/api/rss-news')
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(function(news) {
+            console.log('✅ RSS News loaded:', news.length, 'articles');
+            displayNews(news, container, loadingStatus);
+        })
+        .catch(function(error) {
+            console.log('❌ RSS fetch failed, using fallback news:', error);
+            loadFallbackNews(container, loadingStatus);
+        });
+}
+
+function displayNews(news, container, loadingStatus) {
+    container.innerHTML = '';
+    
+    // Add news cards with staggered animation
+    news.forEach(function(item, index) {
+        setTimeout(function() {
+            var newsCard = document.createElement('div');
+            newsCard.className = 'news-card ' + (item.category || 'tech');
+            newsCard.style.opacity = '0';
+            newsCard.style.transform = 'translateY(20px)';
+            newsCard.style.cursor = 'pointer';
+            newsCard.innerHTML = 
+                '<div class="news-content">' +
+                    '<h3>' + item.title + ' <span class="clickable-indicator">👆</span></h3>' +
+                    '<p class="news-summary">' + (item.summary || 'Click to read more...') + '</p>' +
+                    '<div class="news-footer">' +
+                        '<p class="news-date">📅 ' + (item.date || 'Recent') + ' | 🏷️ ' + (item.category || 'TECH').toUpperCase() + '</p>' +
+                        '<p class="news-source">📰 Source: ' + (item.source || 'AI News') + ' | 🔗 <span class="click-hint">Click to read more</span></p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="news-external-icon">🔗</div>';
+            
+            // Add click handler
+            newsCard.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('📰 Opening news article:', item.title);
+                console.log('🔗 URL:', item.url);
+                
+                // Add visual feedback
+                newsCard.style.transform = 'translateY(-4px) scale(1.01)';
+                newsCard.style.transition = 'all 0.2s ease';
+                
+                setTimeout(function() {
+                    // Open link in same tab to avoid tab issues
+                    try {
+                        console.log('🔗 Opening:', item.url);
+                        window.location.href = item.url;
+                    } catch (error) {
+                        console.error('❌ Error opening URL:', error);
+                        alert('Unable to open link: ' + item.url);
+                    }
+                }, 200);
+            });
+            
+            // Add hover effects
+            newsCard.addEventListener('mouseenter', function() {
+                var clickHint = newsCard.querySelector('.click-hint');
+                if (clickHint) {
+                    clickHint.style.animation = 'pulse 1s infinite';
+                }
+            });
+            
+            newsCard.addEventListener('mouseleave', function() {
+                var clickHint = newsCard.querySelector('.click-hint');
+                if (clickHint) {
+                    clickHint.style.animation = '';
+                }
+            });
+            
+            container.appendChild(newsCard);
+            
+            // Animate in
+            setTimeout(function() {
+                newsCard.style.transition = 'all 0.5s ease-out';
+                newsCard.style.opacity = '1';
+                newsCard.style.transform = 'translateY(0)';
+            }, 50);
+            
+        }, index * 150);
+    });
+    
+    // Hide loading status
+    if (loadingStatus) {
+        setTimeout(function() {
+            loadingStatus.style.opacity = '0';
+            setTimeout(function() {
+                loadingStatus.style.display = 'none';
+            }, 300);
+        }, news.length * 150 + 500);
+    }
+}
+
+function loadFallbackNews(container, loadingStatus) {
+    // Simple fallback news when RSS fails
+    var news = [
+        {
+            title: 'AI News Feed Temporarily Unavailable',
+            category: 'tech',
+            date: new Date().toISOString().split('T')[0],
+            summary: 'We are experiencing issues loading the latest AI news. Please try refreshing the page.',
+            url: 'https://www.artificialintelligence-news.com/',
+            source: 'AI News'
+        },
+        {
+            title: 'Visit TechCrunch AI for Latest Updates',
+            category: 'tech',
+            date: new Date().toISOString().split('T')[0],
+            summary: 'Stay updated with the latest AI developments and breakthroughs.',
+            url: 'https://techcrunch.com/category/artificial-intelligence/',
+            source: 'TechCrunch'
+        },
+        {
+            title: 'Explore VentureBeat AI Coverage',
+            category: 'tech',
+            date: new Date().toISOString().split('T')[0],
+            summary: 'Comprehensive coverage of AI industry news and analysis.',
+            url: 'https://venturebeat.com/ai/',
+            source: 'VentureBeat'
+        }
+    ];
+    
+    displayNews(news, container, loadingStatus);
             {
                 title: 'Claude 3.5 Sonnet Computer Use Feature Expansion',
                 category: 'claude',
@@ -625,20 +751,13 @@ function loadAINews() {
                         newsCard.style.transform = 'translateY(-8px) scale(1.02)';
                     }, 300);
 
-                    // Try to open the link with error handling
+                    // Open link in same tab to avoid tab issues
                     try {
-                        var newWindow = window.open(item.url, '_blank', 'noopener,noreferrer');
-                        if (!newWindow) {
-                            // Fallback if popup blocked
-                            console.log('⚠️ Popup blocked, trying alternative method');
-                            window.location.href = item.url;
-                        } else {
-                            console.log('✅ Successfully opened:', item.url);
-                        }
+                        console.log('🔗 Opening:', item.url);
+                        window.location.href = item.url;
                     } catch (error) {
                         console.error('❌ Error opening URL:', error);
-                        // Show user-friendly message
-                        alert('Unable to open link. Please try again or copy the URL: ' + item.url);
+                        alert('Unable to open link: ' + item.url);
                     }
                 });
 
