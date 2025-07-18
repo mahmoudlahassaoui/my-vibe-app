@@ -5,7 +5,7 @@ console.log('🎮 Script loaded!');
 var gameState = {
     sequence: [],
     playerSequence: [],
-    level: 1,
+    level: 0,
     score: 0,
     isPlaying: false,
     isShowingSequence: false
@@ -27,9 +27,11 @@ function initAudio() {
     try {
         // Check for AudioContext support
         if (window.AudioContext) {
-            audioContext = new AudioContext();
+            audioContext = new window.AudioContext();
+            console.log('🔊 Audio context created with AudioContext:', audioContext.state);
         } else if (window.webkitAudioContext) {
             audioContext = new window.webkitAudioContext();
+            console.log('🔊 Audio context created with webkitAudioContext:', audioContext.state);
         } else {
             console.log('🔇 Web Audio API not supported');
             return;
@@ -37,10 +39,10 @@ function initAudio() {
         
         // Resume audio context if suspended (required by some browsers)
         if (audioContext.state === 'suspended') {
-            audioContext.resume();
+            console.log('🔄 Audio context is suspended, will resume on user interaction');
         }
         
-        console.log('🔊 Audio initialized successfully');
+        console.log('🔊 Audio initialized successfully, state:', audioContext.state);
     } catch (e) {
         console.log('🔇 Audio initialization failed:', e);
     }
@@ -48,11 +50,30 @@ function initAudio() {
 
 // Play sound with frequency
 function playSoundEffect(frequency, duration = 300) {
+    console.log('🎵 Attempting to play sound:', frequency, 'Hz for', duration, 'ms');
+    
     if (!audioContext) {
+        console.log('🔧 Audio context not initialized, initializing...');
         initAudio();
     }
-    if (!audioContext) return;
     
+    if (!audioContext) {
+        console.log('❌ Audio context still not available');
+        return;
+    }
+    
+    if (audioContext.state === 'suspended') {
+        console.log('🔄 Audio context suspended, resuming...');
+        audioContext.resume().then(function() {
+            console.log('✅ Audio context resumed');
+            playTone(frequency, duration);
+        });
+    } else {
+        playTone(frequency, duration);
+    }
+}
+
+function playTone(frequency, duration) {
     try {
         var oscillator = audioContext.createOscillator();
         var gainNode = audioContext.createGain();
@@ -68,6 +89,8 @@ function playSoundEffect(frequency, duration = 300) {
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + duration / 1000);
+        
+        console.log('✅ Sound played successfully:', frequency, 'Hz');
     } catch (e) {
         console.log('🔇 Audio playback failed:', e);
     }
@@ -305,9 +328,14 @@ function showSequence() {
     }, delay + 500);
 }
 
-function flashTile(color, playSound = false) {
+function flashTile(color, shouldPlaySound = false) {
     var tile = document.querySelector('.color-tile[data-color="' + color + '"]');
-    if (!tile) return;
+    if (!tile) {
+        console.log('❌ Tile not found for color:', color);
+        return;
+    }
+    
+    console.log('🎯 Flashing tile:', color, 'with sound:', shouldPlaySound);
     
     // Visual flash effect
     tile.style.transform = 'scale(1.1)';
@@ -315,7 +343,8 @@ function flashTile(color, playSound = false) {
     tile.style.filter = 'brightness(1.5)';
     
     // Play sound
-    if (playSound && sounds[color]) {
+    if (shouldPlaySound && sounds[color]) {
+        console.log('🔊 Playing sound for:', color, 'frequency:', sounds[color]);
         playSoundEffect(sounds[color], 400);
     }
     
@@ -329,15 +358,22 @@ function flashTile(color, playSound = false) {
 
 function gameClick(color) {
     if (!gameState.isPlaying || gameState.isShowingSequence) {
+        console.log('🚫 Game click ignored - isPlaying:', gameState.isPlaying, 'isShowingSequence:', gameState.isShowingSequence);
         return;
     }
     
     console.log('🎯 Player clicked:', color);
     
+    // Initialize audio on first game interaction
+    if (!audioContext) {
+        console.log('🔧 Initializing audio for game click...');
+        initAudio();
+    }
+    
     // Add to player sequence
     gameState.playerSequence.push(color);
     
-    // Flash the clicked tile
+    // Flash the clicked tile with sound
     flashTile(color, true);
     
     // Check if correct
